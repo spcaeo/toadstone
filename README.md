@@ -12,6 +12,7 @@ This one is named after that, on purpose.
 [![Tests](https://github.com/spcaeo/toadstone/actions/workflows/tests.yml/badge.svg)](https://github.com/spcaeo/toadstone/actions/workflows/tests.yml)
 [![Checks observed firing](https://img.shields.io/badge/checks%20observed%20firing-180%20in%20one%20sweep-2f6f4e)](#the-number-that-matters)
 [![Self-hosted](https://img.shields.io/badge/self--hosted-docker-2496ed)](#quick-start)
+[![Fork of LibreCrawl](https://img.shields.io/badge/fork%20of-LibreCrawl%20(MIT)-6b7280)](https://github.com/PhialsBasement/LibreCrawl)
 
 [Quick start](#quick-start) ·
 [What it finds](#what-it-finds) ·
@@ -23,6 +24,18 @@ This one is named after that, on purpose.
 [FAQ](#faq)
 
 </div>
+
+> **This is a fork.** Toadstone is built on
+> [LibreCrawl](https://github.com/PhialsBasement/LibreCrawl) by Phiality,
+> MIT-licensed, and diverged at commit
+> [`d0ac5058`](https://github.com/PhialsBasement/LibreCrawl/commit/d0ac5058cc0d3a3747ea6983b1a4e8cda356abdf)
+> (2026-09-08). 106 commits were added on top. GitHub shows no "forked from"
+> banner because this was published as a clean repository rather than a GitHub
+> fork, so it is said here instead: **the inherited code is Phiality's and
+> remains MIT**, available from its own authors on its own terms. What is
+> licensed under ELv2 is the work added since. See [NOTICE](NOTICE),
+> [LICENSE](LICENSE) and [FORK.md](FORK.md), and
+> [Credits](#credits) for why the fork exists at all.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/screens/hero-dark.png">
@@ -148,9 +161,9 @@ Two things in there do more work than they look like they do:
 
 ## Watch it work
 
-![Toadstone crawling the bundled fixture site and reporting what it found](assets/demo.gif)
+![Toadstone crawling freshlycited.com: a URL typed in, 141 pages streaming through, then the findings grouped by check](assets/demo.gif)
 
-<div align="center"><sub>A real crawl of the bundled fixture, time-lapsed. Nothing staged: the counters, the rows and the findings are the app's own.</sub></div>
+<div align="center"><sub>A real crawl of <a href="https://freshlycited.com/">freshlycited.com</a>, time-lapsed. Nothing staged: the URL is typed, the counters climb, and the findings at the end are the ones it actually found.</sub></div>
 
 ---
 
@@ -831,7 +844,7 @@ Honest about what is not here yet.
 | **[docs/demo/video-script.md](docs/demo/video-script.md)** | The demo video, scene by scene, with the rule that no claim appears in it the repository cannot back |
 | **[docs/demo/launch-post.md](docs/demo/launch-post.md)** | The launch narrative — long, short and one-line — plus the claims we deliberately do not make |
 | **[docs/about-the-name.md](docs/about-the-name.md)** | Why a fake medieval gem is the right name for a crawler, and the audit that earned it |
-| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 146 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
+| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 148 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
 | **[CHANGELOG.md](CHANGELOG.md)** | What changed and when, with the known problems listed rather than omitted |
 | **[FORK.md](FORK.md)** | Exactly what this fork adds on top of LibreCrawl |
 | **[SECURITY.md](SECURITY.md)** · **[CONTRIBUTING.md](CONTRIBUTING.md)** · **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | How to report a vulnerability, how to get a change merged, and how to behave |
