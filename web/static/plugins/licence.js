@@ -211,6 +211,11 @@
               </div>
 
               <div class="lc-sec">
+                <p class="lc-foot">Other products named anywhere in this project's
+                documentation — Screaming Frog, Sitebulb, Ahrefs, Semrush, Google and
+                the rest — are trademarks of their respective owners, used only to
+                identify what is being compared. Toadstone is not affiliated with,
+                endorsed by or sponsored by any of them.</p>
                 <p class="lc-foot">Copyright 2026 Space-O Technologies. Author: Rakesh Patel.
                 Built by <a href="https://www.labsmedia.com/" target="_blank" rel="noopener">LabsMedia</a>,
                 the digital marketing division of

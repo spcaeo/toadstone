@@ -10,13 +10,13 @@ This one is named after that, on purpose.
 [![Licence: Elastic 2.0](https://img.shields.io/badge/licence-Elastic%202.0-2f6f4e)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776ab)](https://www.python.org/)
 [![Tests](https://github.com/spcaeo/toadstone/actions/workflows/tests.yml/badge.svg)](https://github.com/spcaeo/toadstone/actions/workflows/tests.yml)
-[![Checks observed firing](https://img.shields.io/badge/checks%20observed%20firing-180%20in%20one%20sweep-2f6f4e)](#the-number-that-matters)
+[![Checks observed firing](https://img.shields.io/badge/checks%20observed%20firing-180%20in%20one%20sweep-2f6f4e)](#then-i-found-something-i-was-not-looking-for)
 [![Self-hosted](https://img.shields.io/badge/self--hosted-docker-2496ed)](#quick-start)
-[![Fork of LibreCrawl](https://img.shields.io/badge/fork%20of-LibreCrawl%20(MIT)-6b7280)](https://github.com/PhialsBasement/LibreCrawl)
 [![Live demo](https://img.shields.io/badge/live%20demo-no%20sign--up-e0b254)](https://spcaeo.github.io/toadstone/)
 
 **[▶ Live demo — a real crawl, no sign-up](https://spcaeo.github.io/toadstone/)**
 
+[Why this exists](#why-this-exists) ·
 [Quick start](#quick-start) ·
 [What it finds](#what-it-finds) ·
 [Screenshots](#see-it) ·
@@ -28,18 +28,6 @@ This one is named after that, on purpose.
 
 </div>
 
-> **This is a fork.** Toadstone is built on
-> [LibreCrawl](https://github.com/PhialsBasement/LibreCrawl) by Phiality,
-> MIT-licensed, and diverged at commit
-> [`d0ac5058`](https://github.com/PhialsBasement/LibreCrawl/commit/d0ac5058cc0d3a3747ea6983b1a4e8cda356abdf)
-> (2026-09-08). 106 commits were added on top. GitHub shows no "forked from"
-> banner because this was published as a clean repository rather than a GitHub
-> fork, so it is said here instead: **the inherited code is Phiality's and
-> remains MIT**, available from its own authors on its own terms. What is
-> licensed under ELv2 is the work added since. See [NOTICE](NOTICE),
-> [LICENSE](LICENSE) and [FORK.md](FORK.md), and
-> [Credits](#credits) for why the fork exists at all.
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/screens/hero-dark.png">
   <img alt="Toadstone's issues view: findings grouped by check, each with its machine-readable slug and a count" src="assets/screens/hero-light.png">
@@ -49,14 +37,32 @@ This one is named after that, on purpose.
 
 ---
 
-## The number that matters
+## Why this exists
+
+I run an SEO team of 22 people. Screaming Frog is licensed per machine.
+
+That is not a complaint about the price — it is a good tool and worth its
+licence. It is that the **shape** is wrong for how we work. We are in Ahrefs
+every day. We need a full technical crawl maybe five or six times a month.
+Paying a seat for every executive so each of them can run a crawl a handful of
+times a month is paying for the wrong thing.
+
+What I wanted was one instance I host myself, on my own Mac, that the whole
+team can reach — and that **Claude Code can talk to directly over MCP**, so a
+crawl comes back as a list of issues to fix rather than a CSV someone has to
+open, read and turn into tickets.
+
+Nothing available had that shape. So I forked an open-source crawler and
+started building.
+
+### Then I found something I was not looking for
 
 Most SEO crawlers advertise how many checks they have. That number is almost
 meaningless, and here is why.
 
-On the day this fork was named, somebody counted how many of its checks had
-ever been *observed to fire* on a real crawl. It had about 225. **Eighty-four
-of them had ever fired.** The rest passed their unit tests and sat inert:
+I counted how many of the ones I had inherited had ever been *observed to fire*
+on a real page. There were about 225. **Eighty-four of them had ever fired.**
+The rest passed their unit tests and sat inert:
 
 - eight AMP checks that could not fire on any site, because the markup they
   read was discarded before they ran;
@@ -170,9 +176,10 @@ Two things in there do more work than they look like they do:
 
 **[See the full report from this crawl →](https://spcaeo.github.io/toadstone/)** ·
 **[Watch the 40-second launch video →](assets/video/launch.mp4)**
-Every finding, grouped by check, with its evidence and its fix. No sign-up,
-nothing to install — it is the app's own output, exported by
-`tools/build_demo_site.py` and published from `gh-pages`.
+**It is the actual interface**, frozen over a real crawl — the same templates,
+stylesheet and JavaScript, with every API response captured and replayed. Tabs
+switch, filters filter, findings expand, the command palette opens. Starting a
+new crawl is the one thing it cannot do. Built by `tools/build_demo_app.py`.
 
 ---
 
@@ -566,6 +573,19 @@ tools. What differs is what it may do and what it costs:
 | **Ahrefs**, **Semrush** | Metered: calls consume plan units |
 | **Botify** | Goes furthest — agents that change the site, not only describe it |
 
+---
+
+<sub>**Trademarks.** Screaming Frog, Sitebulb, Sitemoth, Netpeak Spider, Visual
+SEO Studio, Greenflare, SEO Macroscope, Botify, Lumar, Oncrawl, JetOctopus,
+Conductor, seoClarity, Ryte, Ahrefs, Semrush, Moz, SE Ranking, Serpstat,
+Sitechecker, Google, Search Console, Google Analytics, Chrome, Bing, axe,
+axe DevTools, WAVE, Pa11y and LibreCrawl are trademarks or registered
+trademarks of their respective owners. **Toadstone is not affiliated with,
+endorsed by, sponsored by or supported by any of them.** The comparisons above
+are drawn from each vendor's own published documentation on the date stated,
+are offered as fair comment for the purpose of comparison, and may be out of
+date — a correction is a welcome pull request.</sub>
+
 ### The free baseline
 
 **Google Search Console is not a crawler**, and that is the point. It tells you
@@ -853,7 +873,7 @@ Honest about what is not here yet.
 | **[docs/demo/video-script.md](docs/demo/video-script.md)** | The demo video, scene by scene, with the rule that no claim appears in it the repository cannot back |
 | **[docs/demo/launch-post.md](docs/demo/launch-post.md)** | The launch narrative — long, short and one-line — plus the claims we deliberately do not make |
 | **[docs/about-the-name.md](docs/about-the-name.md)** | Why a fake medieval gem is the right name for a crawler, and the audit that earned it |
-| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 151 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
+| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 155 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
 | **[CHANGELOG.md](CHANGELOG.md)** | What changed and when, with the known problems listed rather than omitted |
 | **[FORK.md](FORK.md)** | Exactly what this fork adds on top of LibreCrawl |
 | **[SECURITY.md](SECURITY.md)** · **[CONTRIBUTING.md](CONTRIBUTING.md)** · **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | How to report a vulnerability, how to get a change merged, and how to behave |
@@ -864,6 +884,7 @@ Honest about what is not here yet.
 |---|---|
 | `tools/coverage_sweep.py` | Runs every fixture mode and prints how many distinct checks fired. The number in the badge |
 | `tools/screenshots.py` | Regenerates every image in this README, refusing to write one that shows personal data |
+| `tools/build_demo_app.py` | Freezes the running app over a real crawl into a static site — the published live demo |
 | `tools/generate_checks_doc.py` | Rebuilds `docs/checks.md` from the app's own catalogue |
 | `tools/verify_google.py` | Makes real calls to Google and checks every field and enum against Google's published Discovery documents |
 | `tools/verify_link_metrics.py` | Calls Moz, Majestic and Ahrefs and asserts each *refuses properly* without a key — because an integration that turns a refusal into `{}` reads downstream as "this page has no backlinks" |

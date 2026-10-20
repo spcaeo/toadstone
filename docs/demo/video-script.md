@@ -1,8 +1,14 @@
 # Demo video — script and shot list
 
-Ninety seconds, story-led, outcome first. Built to be cut in
-[snapcn](https://snapcn.dev) (Remotion), so every beat below names the shot
-type it needs.
+Ninety seconds, story-led, outcome first. **Cut in
+[snapcn](https://snapcn.dev)** (Remotion) — the source lives in that project
+under `video/`, and renders with `node video/render.mjs`. Each beat below names
+the component it uses.
+
+The one that does the real work is `ScreenRecording`: its camera keyframes let
+a still screenshot be pushed into and panned across, so a viewer is *shown* the
+part of the screen that matters instead of being left to find it. That is the
+difference between a feature tour and a slideshow of pictures.
 
 The rule for this script: **no claim appears in it that the repository cannot
 back.** Every number is one a viewer can reproduce with a command that is

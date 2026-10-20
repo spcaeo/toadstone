@@ -1,12 +1,61 @@
 # Launch post
 
-Same shape as the Skald post: the problem first, why the obvious tools do not
-solve it, what was built, what you know afterwards, then the ask. Written to be
-posted as-is.
+The shape is the one that works: the problem first, why the obvious tools do
+not solve it, what was built, what you know afterwards, then the ask. Written
+to be posted as-is.
 
 ---
 
-## Long version
+## LinkedIn
+
+I had a problem: my SEO crawler kept telling me a site was clean. The site was
+not clean.
+
+So I counted something nobody counts. The crawler had **225 checks. Eighty-four
+of them had ever fired** — on any page, ever. The rest passed their unit tests
+and sat there. Eight AMP checks read markup that was thrown away before they
+ran. Every PDF check died the moment JavaScript rendering was switched on.
+Worse: a failed PageSpeed call — the API returning a quota error — reported
+back as a clean bill of performance, which looks exactly like a perfect site.
+
+Screaming Frog and Sitebulb can't fix this, and neither can Ahrefs or Semrush.
+Not because they're bad — they're better than me at most of this — but because
+none of them ships the one thing that would help. **Every crawler tells you
+what it found. None tells you what it is incapable of finding.** You cannot
+tell a silent check from a passing one, and an empty report looks the same
+either way.
+
+So I built Toadstone. It ships a site that is wrong on purpose, crawls it with
+the real crawler, and records which checks actually appear.
+
+Now I know:
+
+- which of its 222 checks have been **watched to fire** — 180, printed by one
+  command anyone can run
+- which ones rest on a stubbed API, and which two cannot honestly be reached
+  at all
+- what a clean report means on a site I maintain: 141 pages, zero errors, and
+  **nine things worth fixing anyway** — articles "published" milliseconds apart
+  because the dates were two reads of one clock, images lazy-loaded where the
+  visitor sees them first, a security header present and doing nothing
+- that every finding keeps the same id between crawls, so "what changed since
+  last week" has an answer
+
+It reads Search Console and Analytics if you connect them, analyses your
+server's own access log, audits accessibility with axe-core, and ships an MCP
+server so an agent can query your crawls directly — unmetered, because they're
+your crawls.
+
+Try the live demo, no sign-up
+
+https://spcaeo.github.io/toadstone/
+
+It's free to self-host with Docker or one command, and the crawl never leaves
+your machine.
+
+---
+
+## Long version, for a blog or a README
 
 I had a problem: my SEO crawler kept telling me a site was clean. The site was
 not clean.
