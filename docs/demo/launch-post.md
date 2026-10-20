@@ -9,64 +9,40 @@ to be posted as-is.
 ## LinkedIn
 
 Post the video **natively** — the feed suppresses posts whose payload is an
-outbound link, and native video reaches several times further. Upload the 1080p
-master, not the 720p copy. One link in the body (the demo); GitHub goes in the
-first comment.
+outbound link, and native video reaches several times further. One link in the
+body (the demo); GitHub goes in the first comment.
 
-> I run an SEO team of 22 people. Screaming Frog is licensed per machine.
+Around 165 words. The long version below exists for a blog, not for a feed:
+the examples and the feature list are what make it too long to scroll past.
+
+> I run an SEO team of 22. Screaming Frog is licensed per machine.
 >
-> That's not a complaint about the price. It's a good tool and worth its
-> licence. The shape is wrong for how we work.
+> That's not a price complaint — it's a good tool, worth its licence. The shape
+> is wrong. We're in Ahrefs daily. We need a full technical crawl five or six
+> times a month. Paying a seat for every executive so each can crawl a handful
+> of times a month is paying for the wrong thing.
 >
-> We're in Ahrefs every day. We need a full technical crawl maybe five or six
-> times a month. Paying a seat for every executive so each of them can run a
-> crawl a handful of times a month is paying for the wrong thing.
+> I wanted one instance on my own Mac that the whole team reaches, and that
+> Claude Code can drive over MCP — so a crawl comes back as issues to fix, not
+> a CSV someone turns into tickets.
 >
-> What I wanted was one instance I host myself, on my own Mac, that the whole
-> team can reach — and that Claude Code can talk to directly over MCP, so a
-> crawl comes back as a list of issues to fix rather than a CSV someone has to
-> open, read and turn into tickets.
+> So I forked an open-source crawler and started building. Then I found
+> something I wasn't looking for: of its 225 checks, only 84 had ever actually
+> fired on a real page. A failed PageSpeed call even reported back as perfect
+> performance.
 >
-> Nothing available had that shape. So I forked an open-source crawler and
-> started building.
+> Every crawler tells you what it found. None tells you what it can't find.
 >
-> Then I found something I wasn't looking for.
+> Toadstone ships a site that's wrong on purpose and prints how many checks
+> really fire. 180.
 >
-> I counted how many of its checks had ever actually run on a real page. It had
-> 225 checks. Eighty-four of them had ever fired.
->
-> Eight AMP checks read markup that was thrown away before they ran. Every PDF
-> check died the moment JavaScript rendering was switched on. And a failed
-> PageSpeed call — the API returning a quota error — reported back as a clean
-> bill of performance, which looks exactly like a perfect site.
->
-> That's the real problem, and it isn't specific to one tool. Every crawler
-> tells you what it found. None tells you what it is incapable of finding. You
-> can't tell a silent check from a passing one.
->
-> So Toadstone now ships a site that is wrong on purpose, crawls it with the
-> real crawler, and records which checks actually appear. 180 of them, printed
-> by one command anyone can run.
->
-> What my team has now:
->
-> → one self-hosted instance, no per-seat licence, no per-URL pricing
-> → Claude Code connected over MCP: "crawl this and tell me what to fix" comes
-> back as grouped findings with evidence and a fix line — unmetered, because
-> they're our crawls
-> → every finding keeps the same id between crawls, so "what changed since last
-> week" has an answer
-> → Search Console, Analytics, server logs and axe-core accessibility in the
-> same report
->
-> On a site we maintain: 141 pages, zero errors, and nine things worth fixing
-> anyway.
->
-> Live demo, no sign-up — it's the actual interface, not a screenshot:
+> Live demo, no sign-up — the real interface, not a screenshot:
 > https://spcaeo.github.io/toadstone/
->
-> Free to self-host with Docker or one command. The crawl never leaves your
-> machine.
+
+**What was cut, and why it can go:** the AMP and PDF examples, the four-bullet
+feature list, and "141 pages, zero errors". The PageSpeed line survives because
+it is the most damning thing here in the fewest words. To go shorter still,
+drop the Ahrefs sentence — about 130 words, and the argument holds.
 
 ### Where the files are
 
