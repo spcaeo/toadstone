@@ -8,52 +8,74 @@ to be posted as-is.
 
 ## LinkedIn
 
-I had a problem: my SEO crawler kept telling me a site was clean. The site was
-not clean.
+Post the video **natively** — the feed suppresses posts whose payload is an
+outbound link, and native video reaches several times further. Upload the 1080p
+master, not the 720p copy. One link in the body (the demo); GitHub goes in the
+first comment.
 
-So I counted something nobody counts. The crawler had **225 checks. Eighty-four
-of them had ever fired** — on any page, ever. The rest passed their unit tests
-and sat there. Eight AMP checks read markup that was thrown away before they
-ran. Every PDF check died the moment JavaScript rendering was switched on.
-Worse: a failed PageSpeed call — the API returning a quota error — reported
-back as a clean bill of performance, which looks exactly like a perfect site.
+> I run an SEO team of 22 people. Screaming Frog is licensed per machine.
+>
+> That's not a complaint about the price. It's a good tool and worth its
+> licence. The shape is wrong for how we work.
+>
+> We're in Ahrefs every day. We need a full technical crawl maybe five or six
+> times a month. Paying a seat for every executive so each of them can run a
+> crawl a handful of times a month is paying for the wrong thing.
+>
+> What I wanted was one instance I host myself, on my own Mac, that the whole
+> team can reach — and that Claude Code can talk to directly over MCP, so a
+> crawl comes back as a list of issues to fix rather than a CSV someone has to
+> open, read and turn into tickets.
+>
+> Nothing available had that shape. So I forked an open-source crawler and
+> started building.
+>
+> Then I found something I wasn't looking for.
+>
+> I counted how many of its checks had ever actually run on a real page. It had
+> 225 checks. Eighty-four of them had ever fired.
+>
+> Eight AMP checks read markup that was thrown away before they ran. Every PDF
+> check died the moment JavaScript rendering was switched on. And a failed
+> PageSpeed call — the API returning a quota error — reported back as a clean
+> bill of performance, which looks exactly like a perfect site.
+>
+> That's the real problem, and it isn't specific to one tool. Every crawler
+> tells you what it found. None tells you what it is incapable of finding. You
+> can't tell a silent check from a passing one.
+>
+> So Toadstone now ships a site that is wrong on purpose, crawls it with the
+> real crawler, and records which checks actually appear. 180 of them, printed
+> by one command anyone can run.
+>
+> What my team has now:
+>
+> → one self-hosted instance, no per-seat licence, no per-URL pricing
+> → Claude Code connected over MCP: "crawl this and tell me what to fix" comes
+> back as grouped findings with evidence and a fix line — unmetered, because
+> they're our crawls
+> → every finding keeps the same id between crawls, so "what changed since last
+> week" has an answer
+> → Search Console, Analytics, server logs and axe-core accessibility in the
+> same report
+>
+> On a site we maintain: 141 pages, zero errors, and nine things worth fixing
+> anyway.
+>
+> Live demo, no sign-up — it's the actual interface, not a screenshot:
+> https://spcaeo.github.io/toadstone/
+>
+> Free to self-host with Docker or one command. The crawl never leaves your
+> machine.
 
-Screaming Frog and Sitebulb can't fix this, and neither can Ahrefs or Semrush.
-Not because they're bad — they're better than me at most of this — but because
-none of them ships the one thing that would help. **Every crawler tells you
-what it found. None tells you what it is incapable of finding.** You cannot
-tell a silent check from a passing one, and an empty report looks the same
-either way.
+### Where the files are
 
-So I built Toadstone. It ships a site that is wrong on purpose, crawls it with
-the real crawler, and records which checks actually appear.
-
-Now I know:
-
-- which of its 222 checks have been **watched to fire** — 180, printed by one
-  command anyone can run
-- which ones rest on a stubbed API, and which two cannot honestly be reached
-  at all
-- what a clean report means on a site I maintain: 141 pages, zero errors, and
-  **nine things worth fixing anyway** — articles "published" milliseconds apart
-  because the dates were two reads of one clock, images lazy-loaded where the
-  visitor sees them first, a security header present and doing nothing
-- that every finding keeps the same id between crawls, so "what changed since
-  last week" has an answer
-
-It reads Search Console and Analytics if you connect them, analyses your
-server's own access log, audits accessibility with axe-core, and ships an MCP
-server so an agent can query your crawls directly — unmetered, because they're
-your crawls.
-
-Try the live demo, no sign-up
-
-https://spcaeo.github.io/toadstone/
-
-It's free to self-host with Docker or one command, and the crawl never leaves
-your machine.
-
----
+| | |
+|---|---|
+| Native upload (1080p, 1:46) | the Remotion render — `video/toadstone-launch.mp4` in the snapcn project |
+| Web copy (720p, 5.5MB) | [`assets/video/launch.mp4`](../../assets/video/launch.mp4) |
+| Shareable page | https://spcaeo.github.io/toadstone/watch.html — for Slack, email, X, anywhere video cannot be uploaded |
+| The demo itself | https://spcaeo.github.io/toadstone/ |
 
 ## Long version, for a blog or a README
 
