@@ -143,6 +143,33 @@ def trim(captured):
     return captured
 
 
+# GitHub Pages serves a project site from /<repo>/, so a path that begins with
+# a slash leaves the site. The plugin loader builds its script src that way,
+# which is correct in the app and 404s here — and fails silently, because a
+# plugin that never loads is a tab that never appears.
+ABSOLUTE_ASSET = re.compile(r'(["\'`])/static/')
+
+
+def relativise_asset_paths(static_root):
+    changed = []
+    for dirpath, _, files in os.walk(static_root):
+        for name in files:
+            if not name.endswith(('.js', '.css')):
+                continue
+            path = os.path.join(dirpath, name)
+            with open(path, encoding='utf-8', errors='replace') as fh:
+                text = fh.read()
+            fixed = ABSOLUTE_ASSET.sub(r'\1static/', text)
+            if fixed != text:
+                with open(path, 'w', encoding='utf-8') as fh:
+                    fh.write(fixed)
+                changed.append(os.path.relpath(path, static_root))
+    if changed:
+        print(f'  made {len(changed)} absolute /static/ reference(s) relative: '
+              + ', '.join(changed[:4]))
+    return changed
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--app', default='http://127.0.0.1:5058')
@@ -206,9 +233,11 @@ def main():
 
     captured = trim(captured)
 
-    # the app's own assets, unmodified
+    # the app's own assets, unmodified except for one thing that cannot survive
+    # being served from a subpath
     shutil.copytree(STATIC_SRC, os.path.join(OUT, 'static'),
                     ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+    relativise_asset_paths(os.path.join(OUT, 'static'))
 
     # the page itself, rewritten to load those assets from here
     html = html.replace('href="/static/', 'href="static/').replace('src="/static/', 'src="static/')

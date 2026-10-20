@@ -14,7 +14,8 @@ This one is named after that, on purpose.
 [![Self-hosted](https://img.shields.io/badge/self--hosted-docker-2496ed)](#quick-start)
 [![Live demo](https://img.shields.io/badge/live%20demo-no%20sign--up-e0b254)](https://spcaeo.github.io/toadstone/)
 
-**[▶ Live demo — a real crawl, no sign-up](https://spcaeo.github.io/toadstone/)**
+**[▶ Live demo — the real app, a real crawl, no sign-up](https://spcaeo.github.io/toadstone/)** ·
+**[Watch the 100-second tour](https://spcaeo.github.io/toadstone/watch.html)**
 
 [Why this exists](#why-this-exists) ·
 [Quick start](#quick-start) ·
@@ -175,7 +176,7 @@ Two things in there do more work than they look like they do:
 <div align="center"><sub>A real crawl of <a href="https://freshlycited.com/">freshlycited.com</a>, time-lapsed. Nothing staged: the URL is typed, the counters climb, and the findings at the end are the ones it actually found.</sub></div>
 
 **[See the full report from this crawl →](https://spcaeo.github.io/toadstone/)** ·
-**[Watch the 40-second launch video →](assets/video/launch.mp4)**
+**[Watch the 100-second tour →](https://spcaeo.github.io/toadstone/watch.html)**
 **It is the actual interface**, frozen over a real crawl — the same templates,
 stylesheet and JavaScript, with every API response captured and replayed. Tabs
 switch, filters filter, findings expand, the command palette opens. Starting a
@@ -575,16 +576,16 @@ tools. What differs is what it may do and what it costs:
 
 ---
 
-<sub>**Trademarks.** Screaming Frog, Sitebulb, Sitemoth, Netpeak Spider, Visual
-SEO Studio, Greenflare, SEO Macroscope, Botify, Lumar, Oncrawl, JetOctopus,
+**Trademarks.** Screaming Frog, Sitebulb, Sitemoth, Netpeak Spider, Visual SEO
+Studio, Greenflare, SEO Macroscope, Botify, Lumar, Oncrawl, JetOctopus,
 Conductor, seoClarity, Ryte, Ahrefs, Semrush, Moz, SE Ranking, Serpstat,
-Sitechecker, Google, Search Console, Google Analytics, Chrome, Bing, axe,
-axe DevTools, WAVE, Pa11y and LibreCrawl are trademarks or registered
-trademarks of their respective owners. **Toadstone is not affiliated with,
-endorsed by, sponsored by or supported by any of them.** The comparisons above
-are drawn from each vendor's own published documentation on the date stated,
-are offered as fair comment for the purpose of comparison, and may be out of
-date — a correction is a welcome pull request.</sub>
+Sitechecker, Google, Search Console, Google Analytics, Chrome, Bing, axe, axe
+DevTools, WAVE, Pa11y and LibreCrawl are trademarks or registered trademarks of
+their respective owners. **Toadstone is not affiliated with, endorsed by,
+sponsored by or supported by any of them.** Those names are used only to
+identify the products being compared. The comparisons are drawn from each
+vendor's own published documentation on the date stated, are offered as fair
+comment, and may be out of date — a correction is a welcome pull request.
 
 ### The free baseline
 
@@ -873,7 +874,7 @@ Honest about what is not here yet.
 | **[docs/demo/video-script.md](docs/demo/video-script.md)** | The demo video, scene by scene, with the rule that no claim appears in it the repository cannot back |
 | **[docs/demo/launch-post.md](docs/demo/launch-post.md)** | The launch narrative — long, short and one-line — plus the claims we deliberately do not make |
 | **[docs/about-the-name.md](docs/about-the-name.md)** | Why a fake medieval gem is the right name for a crawler, and the audit that earned it |
-| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 155 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
+| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 156 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
 | **[CHANGELOG.md](CHANGELOG.md)** | What changed and when, with the known problems listed rather than omitted |
 | **[FORK.md](FORK.md)** | Exactly what this fork adds on top of LibreCrawl |
 | **[SECURITY.md](SECURITY.md)** · **[CONTRIBUTING.md](CONTRIBUTING.md)** · **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | How to report a vulnerability, how to get a change merged, and how to behave |
@@ -970,11 +971,4 @@ Portions inherited from LibreCrawl remain MIT.
 
 Copyright 2026 Space-O Technologies. Author: Rakesh Patel.
 
-<div align="center"><sub>
-
-A toadstone was a gem people believed grew in a toad's head, worn to detect
-poison. They were real objects, and they were fossilised fish teeth, and they
-never detected anything. People wore them for centuries, felt safer, and were
-not. <a href="docs/about-the-name.md">That is why the name is on this tool.</a>
-
-</sub></div>
+<div align="center"><sub>A toadstone was a gem people believed grew in a toad's head, worn to detect poison. They were real objects, they were fossilised fish teeth, and they never detected anything. People wore them for centuries, felt safer, and were not. <a href="docs/about-the-name.md">That is why the name is on this tool.</a></sub></div>
