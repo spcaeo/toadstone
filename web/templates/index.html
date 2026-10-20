@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Toadstone - SEO Spider</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    <link rel="manifest" href="/static/site.webmanifest">
+    <meta name="theme-color" content="#0d0f14">
+    <script>
+        // No-flash: theme and density are on <html> before the stylesheet loads.
+        // Keys and values must match app.js (theme "system" = no data-theme).
+        try {
+            var t = localStorage.getItem('toadstone.theme');
+            if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+            var d = localStorage.getItem('toadstone.density');
+            document.documentElement.dataset.density =
+                (d === 'compact' && innerWidth >= 768) ? 'compact' : 'comfortable';
+        } catch (e) { /* private mode: the media query default stands */ }
+    </script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- ── Topbar (48px) ─────────────────────────────────────────────── -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <!-- The mark: two toads leaning in, with the stone between them.
+                     Solid silhouettes, because at 16px an outline turns to mush.
+                     The stone is the only element in a different hue - it is the
+                     part that means something. Same drawing as web/static/favicon.svg,
+                     without the background tile. -->
+                <svg class="brand-mark" width="18" height="18" viewBox="0 0 32 32" aria-hidden="true">
+                    <g transform="rotate(4 9 25)">
+                        <path class="bm-toad" d="M2.6 25 q0 -8.2 6.4 -8.2 q6.4 0 6.4 8.2 z"/>
+                        <circle class="bm-toad" cx="5.9" cy="16.6" r="2.5"/>
+                        <circle class="bm-toad" cx="11.5" cy="16.2" r="2.5"/>
+                        <circle class="bm-eye" cx="5.9" cy="16.3" r="0.95"/>
+                        <circle class="bm-eye" cx="11.5" cy="15.9" r="0.95"/>
+                        <path class="bm-eye" d="M4.3 21.3 q4.5 2.5 9 0 q-4.5 0.9 -9 0 z"/>
+                    </g>
+                    <g transform="rotate(-4 23 25)">
+                        <path class="bm-toad" d="M16.6 25 q0 -8.2 6.4 -8.2 q6.4 0 6.4 8.2 z"/>
+                        <circle class="bm-toad" cx="20.5" cy="16.2" r="2.5"/>
+                        <circle class="bm-toad" cx="26.1" cy="16.6" r="2.5"/>
+                        <circle class="bm-eye" cx="20.5" cy="15.9" r="0.95"/>
+                        <circle class="bm-eye" cx="26.1" cy="16.3" r="0.95"/>
+                        <path class="bm-eye" d="M18.7 21.3 q4.5 2.5 9 0 q-4.5 0.9 -9 0 z"/>
+                    </g>
+                    <path class="bm-stone" d="M16 4.6 l3.1 3.6 l-3.1 3.6 l-3.1 -3.6 z"/>
+                </svg>
+                <span class="brand-name">Toadstone</span>
+            </div>
+
+            <button type="button" id="megaTrigger" class="mm-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="megaPanel">
+                <span class="mm-trigger-label" id="megaTriggerLabel">Overview</span>
+                <i class="mm-trigger-chevron" data-icon="chevron-down" data-icon-size="12"></i>
+            </button>
+
+
+            <div class="topbar-actions">
+                <button type="button" class="cp-hint" onclick="openPalette()"
+                        title="Find any view, setting or action">
+                    <i data-icon="search" data-icon-size="12" aria-hidden="true"></i>
+                    <span class="cp-hint-text">Find anything</span>
+                    <kbd>⌘K</kbd>
+                </button>
+                <span id="userInfo" class="user-info"></span>
+                <button type="button" id="crawlChip" class="crawl-chip" aria-haspopup="true" aria-expanded="false" aria-controls="megaPanel" title="Crawl switcher">
+                    <span class="crawl-dot" id="crawlChipDot" data-state="idle" aria-hidden="true"></span>
+                    <span class="crawl-chip-label" id="crawlChipLabel">No crawl</span>
+                    <i data-icon="chevron-down" data-icon-size="12"></i>
+                </button>
+                <button type="button" id="themeToggle" class="btn btn-ghost btn-sm icon-btn" aria-label="Switch theme" title="Switch theme">
+                    <i class="icon-moon" data-icon="moon" data-icon-size="14"></i>
+                    <span class="theme-toggle-label"></span>
+                </button>
+            </div>
+        </header>
+
+            <nav class="tab-strip" aria-label="Crawl views">
+                <div class="tab-header" role="tablist" aria-label="Crawl views">
+                    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab-btn" onclick="switchTab('internal')">Internal</button>
+                    <button class="tab-btn" onclick="switchTab('external')">External</button>
+                    <button class="tab-btn" onclick="switchTab('status-codes')">Status Codes</button>
+                    <button class="tab-btn" onclick="switchTab('links')">Links</button>
+                    <button class="tab-btn" onclick="switchTab('issues')">Issues</button>
+                    <button class="tab-btn" onclick="switchTab('pagespeed')">PageSpeed</button>
+                    <button class="tab-btn" onclick="switchTab('visualization')">Visualization</button>
+                    <button class="tab-btn" onclick="switchTab('sitemap')">Sitemap</button>
+                    <button class="tab-btn" onclick="switchTab('compare')">Compare</button>
+                    <button class="tab-btn" onclick="switchTab('rules')">Rules</button>
+                </div>
+            </nav>
+
+        <!-- ── Mega menu ─────────────────────────────────────────────────── -->
+        <div id="megaPanel" class="mm-panel" role="group" aria-labelledby="megaTrigger" hidden>
+            <button type="button" class="mm-close" id="mmClose" aria-label="Close menu"><i data-icon="x" data-icon-size="20"></i></button>
+            <div class="mm-inner">
+                <section class="mm-col">
+                    <h2 class="mm-col-title" id="mmColFound">What was found</h2>
+                    <div class="mm-col-items" aria-labelledby="mmColFound">
+                        <button type="button" class="mm-item" data-tab="overview">
+                            <i data-icon="table" data-icon-size="14"></i><span class="mm-item-label">Overview</span><span class="mm-item-count" data-count-for="overview">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="internal">
+                            <i data-icon="link" data-icon-size="14"></i><span class="mm-item-label">Internal</span><span class="mm-item-count" data-count-for="internal">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="external">
+                            <i data-icon="external-link" data-icon-size="14"></i><span class="mm-item-label">External</span><span class="mm-item-count" data-count-for="external">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="status-codes">
+                            <i data-icon="server" data-icon-size="14"></i><span class="mm-item-label">Status Codes</span><span class="mm-item-count" data-count-for="status-codes">—</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="mm-col">
+                    <h2 class="mm-col-title" id="mmColWrong">What is wrong</h2>
+                    <div class="mm-col-items" aria-labelledby="mmColWrong">
+                        <button type="button" class="mm-item" data-tab="issues">
+                            <i data-icon="list-checks" data-icon-size="14"></i><span class="mm-item-label">Issues</span><span class="mm-item-count" data-count-for="issues">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="rules">
+                            <i data-icon="shield" data-icon-size="14"></i><span class="mm-item-label">Rules</span><span class="mm-item-count" data-count-for="rules">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="pagespeed">
+                            <i data-icon="gauge" data-icon-size="14"></i><span class="mm-item-label">PageSpeed</span><span class="mm-item-count" data-count-for="pagespeed">—</span>
+                        </button>
+                    </div>
+
+                    <h2 class="mm-col-title mm-col-title-sub" id="mmColAct">Act on it</h2>
+                    <div class="mm-col-items" aria-labelledby="mmColAct">
+                        <button type="button" class="mm-item mm-action" onclick="openFixer()">
+                            <i data-icon="bot" data-icon-size="14"></i><span class="mm-item-label">Fixer</span>
+                        </button>
+                        <button type="button" class="mm-item mm-action" onclick="exportData()">
+                            <i data-icon="download" data-icon-size="14"></i><span class="mm-item-label">Export data</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="mm-col">
+                    <h2 class="mm-col-title" id="mmColShape">How it fits together</h2>
+                    <div class="mm-col-items" aria-labelledby="mmColShape">
+                        <button type="button" class="mm-item" data-tab="links">
+                            <i data-icon="git-branch" data-icon-size="14"></i><span class="mm-item-label">Links</span><span class="mm-item-count" data-count-for="links">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="visualization">
+                            <i data-icon="share" data-icon-size="14"></i><span class="mm-item-label">Visualization</span><span class="mm-item-count" data-count-for="visualization">—</span>
+                        </button>
+                        <button type="button" class="mm-item" data-tab="sitemap">
+                            <i data-icon="sitemap" data-icon-size="14"></i><span class="mm-item-label">Sitemap</span><span class="mm-item-count" data-count-for="sitemap">—</span>
+                        </button>
+                    </div>
+
+                    <h2 class="mm-col-title mm-col-title-sub" id="mmColAgainst">Against other data</h2>
+                    <div class="mm-col-items" aria-labelledby="mmColAgainst">
+                        <button type="button" class="mm-item" data-tab="compare">
+                            <i data-icon="git-compare" data-icon-size="14"></i><span class="mm-item-label">Compare</span><span class="mm-item-count" data-count-for="compare">—</span>
+                        </button>
+                        <button type="button" class="mm-item mm-action" onclick="openLogs()">
+                            <i data-icon="file-text" data-icon-size="14"></i><span class="mm-item-label">Server logs</span>
+                        </button>
+                        <button type="button" class="mm-item mm-action" onclick="Promise.resolve(openSettings()).then(() => switchSettingsTab('google'))">
+                            <i data-icon="globe" data-icon-size="14"></i><span class="mm-item-label">Google data</span>
+                        </button>
+                        <button type="button" class="mm-item mm-action" onclick="Promise.resolve(openSettings()).then(() => switchSettingsTab('integrations'))">
+                            <i data-icon="key" data-icon-size="14"></i><span class="mm-item-label">Integrations</span>
+                        </button>
+                    </div>
+
+                    <h2 class="mm-col-title mm-col-title-sub" id="mmColPlugins">Plugins</h2>
+                    <div class="mm-col-items" id="mmPlugins" aria-labelledby="mmColPlugins">
+                        <p class="mm-empty">No plugins installed</p>
+                    </div>
+                </section>
+
+                <section class="mm-col mm-col-crawl">
+                    <h2 class="mm-col-title" id="mmColCrawl">This crawl</h2>
+                    <div class="mm-current active" id="mmCurrentCrawl" aria-live="polite">
+                        <p class="mm-empty">No crawl open</p>
+                    </div>
+
+                    <div class="mm-sep" role="presentation"></div>
+
+                    <h2 class="mm-col-title mm-col-title-sub" id="mmColRecent">Switch crawl</h2>
+                    <div class="mm-col-items mm-crawls" id="mmRecentCrawls" aria-labelledby="mmColRecent">
+                        <p class="mm-empty">Loading…</p>
+                    </div>
+
+                    <div class="mm-sep" role="presentation"></div>
+
+                    <h2 class="mm-col-title mm-col-title-sub" id="mmColActions">Actions</h2>
+                    <div class="mm-col-items mm-actions" aria-labelledby="mmColActions">
+                        <button type="button" class="mm-item mm-action" onclick="openDashboard()"><i data-icon="dashboard" data-icon-size="14"></i>Dashboard</button>
+                        <button type="button" class="mm-item mm-action" onclick="openSettings()"><i data-icon="settings" data-icon-size="14"></i>Settings</button>
+                        <button type="button" class="mm-item mm-action" onclick="exportData()"><i data-icon="download" data-icon-size="14"></i>Export data</button>
+                        <button type="button" class="mm-item mm-action" id="saveCrawlBtn" onclick="saveCrawl()" disabled><i data-icon="save" data-icon-size="14"></i>Save Crawl</button>
+                        <button type="button" class="mm-item mm-action" id="loadCrawlBtn" onclick="loadCrawl()"><i data-icon="folder" data-icon-size="14"></i>Load Crawl</button>
+                        <a class="mm-item mm-action" href="https://workshop.toadstone.com" target="_blank" rel="noopener" title="Browse and share community plugins"><i data-icon="external-link" data-icon-size="14"></i>Workshop</a>
+                        <button type="button" class="mm-item mm-action" onclick="logout()"><i data-icon="log-out" data-icon-size="14"></i>Log out</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- ── Command bar (44px) ────────────────────────────────────────── -->
+        <section class="cmdbar">
+            <div class="cmd-field input-group">
+                <label for="urlInput" class="input-label">URL</label>
+                <input
+                    type="url"
+                    id="urlInput"
+                    class="url-input"
+                    placeholder="https://example.com"
+                    onkeypress="handleUrlKeypress(event)"
+                >
+            </div>
+            <div class="control-buttons">
+                <button id="startBtn" class="btn btn-primary" onclick="toggleCrawl()">
+                    <i data-icon="play" data-icon-size="14"></i>
+                    Start
+                </button>
+                <button id="stopBtn" class="btn btn-danger" onclick="stopCrawl()" disabled>
+                    <i data-icon="stop" data-icon-size="14"></i>
+                    Stop
+                </button>
+                <button id="clearBtn" class="btn btn-secondary" onclick="clearCrawlData()">
+                    <i data-icon="trash" data-icon-size="14"></i>
+                    Clear
+                </button>
+            </div>
+            <div class="progress-container" id="progressContainer" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">Initializing...</span>
+            </div>
+        </section>
+
+        <!-- ── Main ──────────────────────────────────────────────────────── -->
+        <main class="main-content">
+            <div class="rail-scrim" id="railScrim" hidden></div>
+
+            <!-- Filter rail -->
+            <aside class="sidebar" id="filterRail" aria-label="Filters">
+                <div class="rail-head">
+                    <h2 class="rail-heading">Filters</h2>
+                    <button type="button" class="rail-close btn btn-ghost btn-sm" id="railClose" aria-label="Close filters"><i data-icon="x" data-icon-size="14"></i></button>
+                </div>
+
+                <div class="filter-tree">
+                    <div class="filter-group">
+                        <div class="filter-header" id="railScope">Scope</div>
+                        <div class="filter-subgroup" role="group" aria-labelledby="railScope">
+                            <div class="filter-item" onclick="toggleFilter('internal')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="link" data-icon-size="14"></i>
+                                <span class="filter-name">Internal</span>
+                                <span class="filter-count" id="internal-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('external')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="external-link" data-icon-size="14"></i>
+                                <span class="filter-name">External</span>
+                                <span class="filter-count" id="external-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-header" id="railResponse">Response codes</div>
+                        <div class="filter-subgroup" role="group" aria-labelledby="railResponse">
+                            <div class="filter-item" onclick="toggleFilter('2xx')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="check-circle" data-icon-size="14"></i>
+                                <span class="filter-name">2xx Success</span>
+                                <span class="filter-count" id="2xx-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('3xx')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="arrow-right" data-icon-size="14"></i>
+                                <span class="filter-name">3xx Redirect</span>
+                                <span class="filter-count" id="3xx-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('4xx')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="alert-triangle" data-icon-size="14"></i>
+                                <span class="filter-name">4xx Client Error</span>
+                                <span class="filter-count" id="4xx-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('5xx')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="x-circle" data-icon-size="14"></i>
+                                <span class="filter-name">5xx Server Error</span>
+                                <span class="filter-count" id="5xx-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('no_response')" role="button" tabindex="0" aria-pressed="false" title="DNS failure, connection refused, timeout, SSL error, etc. — useful for finding expired domains.">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="link-broken" data-icon-size="14"></i>
+                                <span class="filter-name">No Response</span>
+                                <span class="filter-count" id="no_response-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-header" id="railContent">Content type</div>
+                        <div class="filter-subgroup" role="group" aria-labelledby="railContent">
+                            <div class="filter-item" onclick="toggleFilter('html')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="file-text" data-icon-size="14"></i>
+                                <span class="filter-name">HTML</span>
+                                <span class="filter-count" id="html-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('css')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="code" data-icon-size="14"></i>
+                                <span class="filter-name">CSS</span>
+                                <span class="filter-count" id="css-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('js')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="code" data-icon-size="14"></i>
+                                <span class="filter-name">JavaScript</span>
+                                <span class="filter-count" id="js-count">0</span>
+                            </div>
+                            <div class="filter-item" onclick="toggleFilter('images')" role="button" tabindex="0" aria-pressed="false">
+                                <span class="facet-box" aria-hidden="true"></span>
+                                <i class="facet-icon" data-icon="image" data-icon-size="14"></i>
+                                <span class="filter-name">Images</span>
+                                <span class="filter-count" id="images-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <details class="rail-details" id="railStats" open>
+                    <summary>Statistics</summary>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <span class="stat-label">URLs Discovered</span>
+                            <span class="stat-value" id="discoveredCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">URLs Crawled</span>
+                            <span class="stat-value" id="crawledCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Crawl Depth</span>
+                            <span class="stat-value" id="crawlDepth">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Speed</span>
+                            <span class="stat-value" id="crawlSpeed">0 URLs/sec</span>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="rail-details" id="railDataSize" open>
+                    <summary>Data size</summary>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <span class="stat-label">Crawl Data</span>
+                            <span class="stat-value" id="memCurrent">0 MB</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Per URL</span>
+                            <span class="stat-value" id="memPeak">0 KB/URL</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Est. for 1M URLs</span>
+                            <span class="stat-value" id="memEstimate1M">0 MB</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">System Available</span>
+                            <span class="stat-value" id="memAvailable">0 MB</span>
+                        </div>
+                    </div>
+                </details>
+            </aside>
+
+            <!-- Content area -->
+            <div class="content-area">
+                <!-- ── Sub bar (36px) ────────────────────────────────────── -->
+                <div class="subbar">
+                    <div class="subbar-left">
+                        <button type="button" class="btn btn-secondary btn-sm rail-toggle" id="railToggle" aria-controls="filterRail" aria-expanded="false">
+                            <i data-icon="filter" data-icon-size="14"></i> Filters <span class="rail-toggle-count" id="railToggleCount">0</span>
+                        </button>
+                        <h1 class="subbar-title" id="subbarTitle">Overview</h1>
+                        <span class="subbar-rowcount" id="subbarRowCount"></span>
+                        <div class="filter-chips" id="filterChips"></div>
+                        <button type="button" class="btn btn-ghost btn-sm clear-filters" id="clearFiltersBtn" hidden>Clear all</button>
+                    </div>
+                    <div class="subbar-right">
+                        <div class="seg" role="group" aria-label="Row density">
+                            <button type="button" class="seg-btn" id="densityComfortable" aria-pressed="true" title="Comfortable rows">
+                                <i data-icon="rows" data-icon-size="14"></i>
+                                <span class="sr-only">Comfortable rows</span>
+                            </button>
+                            <button type="button" class="seg-btn" id="densityCompact" aria-pressed="false" title="Compact rows">
+                                <i data-icon="rows-compact" data-icon-size="14"></i>
+                                <span class="sr-only">Compact rows</span>
+                            </button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="exportBtn" onclick="exportData()" aria-haspopup="menu" aria-expanded="false"><i data-icon="download" data-icon-size="14"></i>Export</button>
+                    </div>
+                </div>
+
+                <div class="tab-container">
+                    <div class="tab-content">
+                        <div id="overview-tab" class="tab-pane active" role="tabpanel">
+                            <div class="table-container">
+                                <table class="data-table" id="overviewTable">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="th-inner">Address</span></th>
+                                            <th><span class="th-inner">Status</span></th>
+                                            <th><span class="th-inner">Title</span></th>
+                                            <th><span class="th-inner">Meta Desc</span></th>
+                                            <th><span class="th-inner">H1</span></th>
+                                            <th><span class="th-inner">Keywords</span></th>
+                                            <th><span class="th-inner">Words</span></th>
+                                            <th><span class="th-inner">Response (ms)</span></th>
+                                            <th><span class="th-inner">Analytics</span></th>
+                                            <th><span class="th-inner">OG Tags</span></th>
+                                            <th><span class="th-inner">JSON-LD</span></th>
+                                            <th><span class="th-inner">Links (Int/Ext)</span></th>
+                                            <th><span class="th-inner">Images</span></th>
+                                            <th><span class="th-inner">JS</span></th>
+                                            <th><span class="th-inner">Details</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="overviewTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="internal-tab" class="tab-pane" role="tabpanel">
+                            <div class="table-container">
+                                <table class="data-table" id="internalTable">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="th-inner">Address</span></th>
+                                            <th><span class="th-inner">Status</span></th>
+                                            <th><span class="th-inner">Content Type</span></th>
+                                            <th><span class="th-inner">Size</span></th>
+                                            <th><span class="th-inner">Title</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="internalTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="external-tab" class="tab-pane" role="tabpanel">
+                            <div class="table-container">
+                                <table class="data-table" id="externalTable">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="th-inner">Address</span></th>
+                                            <th><span class="th-inner">Status</span></th>
+                                            <th><span class="th-inner">Content Type</span></th>
+                                            <th><span class="th-inner">Size</span></th>
+                                            <th><span class="th-inner">Title</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="externalTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="status-codes-tab" class="tab-pane" role="tabpanel">
+                            <div class="table-container">
+                                <table class="data-table" id="statusCodesTable">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="th-inner">Status Code</span></th>
+                                            <th><span class="th-inner">Status</span></th>
+                                            <th><span class="th-inner">Count</span></th>
+                                            <th><span class="th-inner">Percentage</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="statusCodesTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="links-tab" class="tab-pane" role="tabpanel">
+                            <div class="links-tab-scroll-container">
+                                <div class="links-sections">
+                                    <div class="links-section">
+                                        <div class="links-section-head">
+                                            <h3 class="links-section-title">Internal Links</h3>
+                                            <div class="links-section-controls">
+                                                <select class="select" aria-label="Internal link status code" onchange="filterInternalLinks(this.value)">
+                                                    <option value="all">All Status Codes</option>
+                                                    <option value="2xx">2xx Success</option>
+                                                    <option value="3xx">3xx Redirect</option>
+                                                    <option value="4xx">4xx Client Error</option>
+                                                    <option value="5xx">5xx Server Error</option>
+                                                </select>
+                                                <input type="text" class="input" aria-label="Search internal links" placeholder="Search..." oninput="searchInternalLinks(this.value)">
+                                            </div>
+                                        </div>
+                                        <div class="table-container internal-links-container">
+                                            <table class="data-table" id="internalLinksTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th><span class="th-inner">Source URL</span></th>
+                                                        <th><span class="th-inner">Target URL</span></th>
+                                                        <th><span class="th-inner">Status</span></th>
+                                                        <th><span class="th-inner">Anchor Text</span></th>
+                                                        <th><span class="th-inner">Placement</span></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="internalLinksTableBody">
+                                                    <!-- Internal links will be populated here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="links-section">
+                                        <div class="links-section-head">
+                                            <h3 class="links-section-title">External Links</h3>
+                                            <div class="links-section-controls">
+                                                <select class="select" aria-label="External link status code" onchange="filterExternalLinks(this.value)">
+                                                    <option value="all">All Status Codes</option>
+                                                    <option value="2xx">2xx Success</option>
+                                                    <option value="3xx">3xx Redirect</option>
+                                                    <option value="4xx">4xx Client Error</option>
+                                                    <option value="5xx">5xx Server Error</option>
+                                                </select>
+                                                <input type="text" class="input" aria-label="Search external links" placeholder="Search..." oninput="searchExternalLinks(this.value)">
+                                            </div>
+                                        </div>
+                                        <div class="table-container external-links-container">
+                                            <table class="data-table" id="externalLinksTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th><span class="th-inner">Source URL</span></th>
+                                                        <th><span class="th-inner">Target URL</span></th>
+                                                        <th><span class="th-inner">Status</span></th>
+                                                        <th><span class="th-inner">Domain</span></th>
+                                                        <th><span class="th-inner">Placement</span></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="externalLinksTableBody">
+                                                    <!-- External links will be populated here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="issues-tab" class="tab-pane" role="tabpanel">
+                            <!-- Severity filters. Kept inside #issues-tab: app.js reads
+                                 `#issues-tab .filter-item`. Styled as the subbar segmented control. -->
+                            <div class="pane-subbar">
+                                <div class="filter-bar seg seg-severity" role="group" aria-label="Issue severity">
+                                    <button class="filter-item seg-btn active" onclick="filterIssues('all')" data-filter="all">
+                                        All Issues <span id="issues-all-count" class="seg-count">(0)</span>
+                                    </button>
+                                    <button class="filter-item seg-btn" onclick="filterIssues('error')" data-filter="error">
+                                        <span class="sev-dot sev-error" aria-hidden="true"></span>Errors <span id="issues-error-count" class="seg-count">(0)</span>
+                                    </button>
+                                    <button class="filter-item seg-btn" onclick="filterIssues('warning')" data-filter="warning">
+                                        <span class="sev-dot sev-warning" aria-hidden="true"></span>Warnings <span id="issues-warning-count" class="seg-count">(0)</span>
+                                    </button>
+                                    <button class="filter-item seg-btn" onclick="filterIssues('info')" data-filter="info">
+                                        <span class="sev-dot sev-info" aria-hidden="true"></span>Info <span id="issues-info-count" class="seg-count">(0)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <table class="data-table" id="issuesTable">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="th-inner">URL</span></th>
+                                            <th><span class="th-inner">Type</span></th>
+                                            <th><span class="th-inner">Category</span></th>
+                                            <th><span class="th-inner">Issue</span></th>
+                                            <th><span class="th-inner">Details</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="issuesTableBody">
+                                        <!-- Issues will be populated here -->
+                                    </tbody>
+                                </table>
+                                <div class="empty-state" id="issuesEmptyState" style="display: none;">
+                                    <div class="empty-state-content">
+                                        <i data-icon="list-checks" data-icon-size="40"></i>
+                                        <h3>No Issues Found</h3>
+                                        <p>Start crawling to detect SEO issues and problems on your website.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pagespeed-tab" class="tab-pane" role="tabpanel">
+                            <div class="pagespeed-container">
+                                <div class="pagespeed-header">
+                                    <h3>PageSpeed Insights Results</h3>
+                                    <p class="pagespeed-description">Performance analysis for homepage and category pages (powered by Google PageSpeed Insights)</p>
+                                </div>
+                                <div id="pagespeedResults" class="pagespeed-results">
+                                    <div class="pagespeed-placeholder">
+                                        <p>PageSpeed analysis will appear here after crawl completion</p>
+                                        <p>Enable PageSpeed Analysis in settings to get Core Web Vitals and performance scores</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="visualization-tab" class="tab-pane" role="tabpanel">
+                            <div class="visualization-container">
+                                <div class="visualization-header">
+                                    <h3>Site Structure Visualization</h3>
+                                    <div class="visualization-controls">
+                                        <select id="vizLayout" class="select" aria-label="Graph layout" onchange="changeLayout(this.value)">
+                                            <option value="cose">Force-Directed</option>
+                                            <option value="breadthfirst">Hierarchical</option>
+                                            <option value="circle">Circle</option>
+                                            <option value="concentric">Concentric</option>
+                                            <option value="grid">Grid</option>
+                                        </select>
+                                        <select id="vizFilter" class="select" aria-label="Graph filter" onchange="filterVisualization(this.value)">
+                                            <option value="all">All Pages</option>
+                                            <option value="html">HTML Only</option>
+                                            <option value="2xx">2xx Success</option>
+                                            <option value="3xx">3xx Redirects</option>
+                                            <option value="4xx">4xx Errors</option>
+                                            <option value="5xx">5xx Errors</option>
+                                        </select>
+                                        <button class="btn btn-secondary btn-sm" onclick="resetVisualization()"><i data-icon="refresh" data-icon-size="14"></i>Reset View</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="exportVisualizationImage()"><i data-icon="image" data-icon-size="14"></i>Export PNG</button>
+                                    </div>
+                                </div>
+                                <div id="cy" class="graph-container">
+                                    <div class="graph-placeholder">
+                                        <i data-icon="share" data-icon-size="40"></i>
+                                        <h3>No Data Yet</h3>
+                                        <p>Start crawling to visualize your site structure</p>
+                                    </div>
+                                </div>
+                                <div class="visualization-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color legend-2xx"></span>
+                                        <span>2xx Success</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color legend-3xx"></span>
+                                        <span>3xx Redirect</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color legend-4xx"></span>
+                                        <span>4xx Error</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color legend-5xx"></span>
+                                        <span>5xx Error</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color legend-other"></span>
+                                        <span>Other</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="sitemap-tab" class="tab-pane" role="tabpanel">
+                            <div class="pane-subbar">
+                                <h3 class="pane-title">Sitemap coverage</h3>
+                                <button class="btn btn-secondary btn-sm" onclick="loadSitemapReport()"><i data-icon="refresh" data-icon-size="14"></i>Refresh</button>
+                            </div>
+                            <div id="sitemapReport" class="pane-body">
+                                <div class="empty-state"><div class="empty-state-content">
+                                    <h3>No crawl open</h3>
+                                    <p>Run or open a crawl to see how its sitemaps line up with what was crawled.</p>
+                                </div></div>
+                            </div>
+                        </div>
+
+                        <div id="rules-tab" class="tab-pane" role="tabpanel">
+                            <div class="pane-subbar">
+                                <h3 class="pane-title">Consistency rules</h3>
+                                <span class="pane-meta">for <strong id="rulesDomain">(no crawl open)</strong></span>
+                                <button class="btn btn-secondary btn-sm" onclick="loadRules()"><i data-icon="refresh" data-icon-size="14"></i>Reload</button>
+                                <button class="btn btn-secondary btn-sm" onclick="testRules()"><i data-icon="check" data-icon-size="14"></i>Test against this crawl</button>
+                                <button class="btn btn-primary btn-sm" onclick="saveRules()"><i data-icon="save" data-icon-size="14"></i>Save</button>
+                            </div>
+                            <div class="pane-body">
+                                <p class="pane-help">
+                                    Plain regex and CSS selectors, checked on every crawl: banned claims, figures that must
+                                    match across pages, button labels, the expected author. Test before saving.
+                                </p>
+                                <div id="rulesStatus" class="rules-status"></div>
+                                <textarea id="rulesEditor" class="code-editor" spellcheck="false" aria-label="Rules editor"></textarea>
+                                <div id="rulesPreview" class="rules-preview"></div>
+                                <h3 class="pane-section-title">Muted issues</h3>
+                                <p class="pane-help">Known limitations that stay out of the issue list until un-muted.</p>
+                                <div id="acceptedIssues" class="table-container"></div>
+                            </div>
+                        </div>
+
+                        <div id="compare-tab" class="tab-pane" role="tabpanel">
+                            <div class="pane-subbar">
+                                <h3 class="pane-title">Compare with</h3>
+                                <select id="compareAgainst" class="select select-wide" aria-label="Crawl to compare against"></select>
+                                <button class="btn btn-primary btn-sm" onclick="runComparison()"><i data-icon="git-compare" data-icon-size="14"></i>Compare</button>
+                                <button class="btn btn-secondary btn-sm" onclick="loadCompareOptions()"><i data-icon="refresh" data-icon-size="14"></i>Refresh list</button>
+                            </div>
+                            <div id="compareReport" class="pane-body">
+                                <div class="empty-state"><div class="empty-state-content">
+                                    <h3>Nothing to compare yet</h3>
+                                    <p>Open a crawl, pick an earlier one, and see what was fixed, what is new and what is unchanged.</p>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ── Status bar (26px) ─────────────────────────────────────────── -->
+        <footer class="status-bar">
+            <span class="status-left" id="statusText">Ready</span>
+            <span class="status-right">
+                <span class="status-summary" id="statusSummary"></span>
+                <span class="status-time" id="crawlTime">00:00</span>
+            </span>
+        </footer>
+    </div>
+
+    <!-- Dashboard Modal -->
+    <div id="dashboardModal" class="modal" style="display: none;">
+        <div class="modal-content modal-content-wide">
+            <div class="modal-header">
+                <h2>Crawl History</h2>
+                <button class="modal-close" onclick="closeDashboard()" aria-label="Close"><i data-icon="x" data-icon-size="16"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="dashboardContent">
+                    <p class="modal-placeholder">Loading crawls...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <!-- ── Server log analysis ───────────────────────────────────────── -->
+    <div id="logsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Server logs</h2>
+                <button class="modal-close" onclick="closeLogs()" aria-label="Close"><i data-icon="x" data-icon-size="16"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="setting-help setting-help-block">
+                    A log says what search engines actually fetched, which no
+                    crawl can tell you. Upload one and it is compared against a
+                    crawl: pages Google asks for that nothing links to, pages
+                    you crawled that no crawler has ever requested, and budget
+                    spent on URLs that only ever error.
+                </p>
+                <p class="setting-help setting-help-block setting-help-strong">
+                    The file is read, analysed and discarded. It is never
+                    written to disk and never stored with the crawl. An access
+                    log is a list of who visited your site and from where, and
+                    it belongs to you.
+                </p>
+
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label for="logFile">Log file</label>
+                        <input type="file" id="logFile" accept=".log,.txt,.json,.gz">
+                        <span class="setting-help" id="logFormats">Apache/Nginx combined, W3C extended, or JSON lines</span>
+                    </div>
+                    <div class="setting-group">
+                        <label for="logCrawlId">Compare against crawl</label>
+                        <select id="logCrawlId"><option value="">Loading&hellip;</option></select>
+                        <span class="setting-help">The crawl whose pages the log is matched to</span>
+                    </div>
+                    <div class="setting-group setting-group-wide">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="logKeep">
+                            Keep the findings on that crawl
+                        </label>
+                        <span class="setting-help">Off by default. A read-only look should not write to a crawl without being asked.</span>
+                    </div>
+                </div>
+
+                <div id="logResults" class="log-results" aria-live="polite"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeLogs()">Close</button>
+                <button class="btn btn-primary" id="logAnalyseBtn" onclick="analyseLog()">Analyse</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Fixer ─────────────────────────────────────────────────────── -->
+    <div id="fixerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Fixer</h2>
+                <button class="modal-close" onclick="closeFixer()" aria-label="Close"><i data-icon="x" data-icon-size="16"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="setting-help setting-help-block">
+                    Turns the findings from a crawl into a brief a coding agent
+                    can act on &mdash; grouped by cause, because forty pages
+                    missing a canonical is one template, not forty jobs.
+                </p>
+                <p class="setting-help setting-help-block setting-help-strong">
+                    Preview first. Nothing is sent anywhere until you press Run,
+                    and the brief below is exactly what would be sent.
+                </p>
+
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label for="fixerCrawlId">Crawl</label>
+                        <select id="fixerCrawlId"><option value="">Loading&hellip;</option></select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="fixerRepoPath">Repository path</label>
+                        <input type="text" id="fixerRepoPath" placeholder="/path/to/your/site" spellcheck="false">
+                        <span class="setting-help">Where the agent should look for the templates</span>
+                    </div>
+                </div>
+
+                <div class="setting-group setting-group-wide">
+                    <label for="fixerBrief">The brief</label>
+                    <textarea id="fixerBrief" rows="14" readonly spellcheck="false"
+                              placeholder="Pick a crawl and press Preview."></textarea>
+                    <span class="setting-help" id="fixerSummary"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeFixer()">Close</button>
+                <button class="btn btn-secondary" onclick="previewFixerBrief()">Preview</button>
+                <button class="btn btn-primary" id="fixerRunBtn" onclick="runFixer()" disabled>Run</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close" onclick="closeSettings()" aria-label="Close"><i data-icon="x" data-icon-size="16"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="settings-tab-btn active" onclick="switchSettingsTab('crawler')">Crawler</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('google')">Google</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('requests')">Requests</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('filters')">Filters</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('export')">Export</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('javascript')">JavaScript</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('issues')">Issue Exclusion</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('customcss')">Custom CSS</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('integrations')">Integrations</button>
+                    <button class="settings-tab-btn" onclick="switchSettingsTab('advanced')">Advanced</button>
+                </div>
+
+                <!-- Crawler Settings -->
+                <div id="crawler-settings" class="settings-tab-content active">
+                    <h3>Crawler Configuration</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="maxDepth">Maximum Crawl Depth</label>
+                            <input type="number" id="maxDepth" value="3" min="1" max="10">
+                            <span class="setting-help">How deep to crawl from the starting URL</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="maxUrls">Maximum URLs to Crawl</label>
+                            <input type="number" id="maxUrls" value="5000000" min="1" max="5000000">
+                            <span class="setting-help">Stop crawling after this many URLs</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="crawlDelay">Crawl Delay (seconds)</label>
+                            <input type="number" id="crawlDelay" value="1" min="0" max="60" step="0.1">
+                            <span class="setting-help">Delay between requests to be respectful</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="followRedirects" checked>
+                                Follow Redirects
+                            </label>
+                            <span class="setting-help">Follow 3xx redirects automatically</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="crawlExternalLinks">
+                                Crawl External Links
+                            </label>
+                            <span class="setting-help">Include external domains in crawl</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ignoreTrackingParams" checked>
+                                Ignore tracking parameters
+                            </label>
+                            <span class="setting-help">URLs that differ only by campaign parameters (utm_source, gclid, ...) are crawled once, not as separate pages</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="auditSitemaps" checked>
+                                Audit sitemaps
+                            </label>
+                            <span class="setting-help">Check the site's sitemaps against what was crawled: dead entries, missing pages, lastmod problems</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="analyseLinkGraph" checked>
+                                Analyse internal linking
+                            </label>
+                            <span class="setting-help">Orphan and weak pages, click depth, anchor-text problems</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="headerChecks" checked>
+                                Check security headers
+                            </label>
+                            <span class="setting-help">Response headers (HSTS, CSP, cookies), http content on https pages, rel=next/prev pagination</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="auditCms" checked>
+                                Check the CMS (WordPress, read-only)
+                            </label>
+                            <span class="setting-help">Compares what the CMS holds with what the site serves. Skipped when no REST API is found</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="cmsExpectedAuthor">Expected author</label>
+                            <input type="text" id="cmsExpectedAuthor" placeholder="e.g. Jane Doe">
+                            <span class="setting-help">Flag CMS items published under a different author. Leave empty to skip</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="renderedChecks">
+                                Rendered-page checks
+                            </label>
+                            <span class="setting-help">Needs JavaScript rendering. Finds blown-up images, fake headings, hidden navigation, console errors and layout overflow</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="linkClusters">Link sections</label>
+                            <input type="text" id="linkClusters" placeholder="/blog/*, /docs/*, /healthcare-app-development/*">
+                            <span class="setting-help">URL patterns analysed as sections in the internal-linking report. Leave empty to use the first path segment</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="mainTextIgnoreSelectors">Ignore in page text</label>
+                            <input type="text" id="mainTextIgnoreSelectors" value="header, nav, footer, aside, .cookie, .breadcrumb">
+                            <span class="setting-help">CSS selectors stripped before a page's text is compared, so a shared layout does not read as duplicate content. Add a site's own card grid or sidebar here</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="staleAfterMonths">Stale after (months)</label>
+                            <input type="number" id="staleAfterMonths" min="1" max="120" value="12">
+                            <span class="setting-help">Sitemap pages not updated in this long are listed as "update these next"</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="webhookUrl">Webhook on completion</label>
+                            <input type="text" id="webhookUrl" placeholder="https://example.com/hooks/toadstone">
+                            <span class="setting-help">POSTs the crawl id, counts by severity and what changed since the last crawl</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="keepLastCrawls">Crawls to keep</label>
+                            <input type="number" id="keepLastCrawls" min="0" max="1000" value="0">
+                            <span class="setting-help">Older crawls are deleted when a crawl finishes. 0 keeps every crawl</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <label for="stripQueryParams">Tracking parameters to strip</label>
+                            <input type="text" id="stripQueryParams" value="utm_*, gclid, gbraid, wbraid, fbclid, msclkid, mc_cid, mc_eid, _ga, _gl, ref, igshid, yclid, dclid, ttclid, li_fat_id, s_kwcid, vero_id, hsa_*">
+                            <span class="setting-help">Comma-separated; a trailing * matches by prefix (e.g. utm_*)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Connection -->
+                <div id="google-settings" class="settings-tab-content">
+                    <h3>Google Search Console &amp; Analytics</h3>
+
+                    <div class="gc" id="gcPanel" data-state="loading">
+
+                        <!-- while we find out -->
+                        <div class="gc-state" data-for="loading">
+                            <p class="gc-muted">Checking&hellip;</p>
+                        </div>
+
+                        <!-- the installation has no Google client yet -->
+                        <div class="gc-state" data-for="setup">
+                            <div class="gc-head">
+                                <span class="gc-dot gc-dot-idle"></span>
+                                <div>
+                                    <strong>One setup step, by whoever installed this</strong>
+                                    <p class="gc-muted" id="gcSetupWhy"></p>
+                                </div>
+                            </div>
+                            <ol class="gc-steps" id="gcSetupSteps"></ol>
+                            <div class="gc-field">
+                                <label>Redirect URI to paste into Google</label>
+                                <div class="gc-copyrow">
+                                    <input type="text" id="gcRedirect" readonly>
+                                    <button type="button" class="btn btn-secondary" id="gcCopyRedirect">Copy</button>
+                                </div>
+                                <span class="setting-help">Must match exactly, including http or https and the port.</span>
+                            </div>
+                            <div class="gc-actions">
+                                <a class="btn btn-primary" id="gcConsoleLink" target="_blank" rel="noopener">Open Google Cloud Console</a>
+                                <button type="button" class="btn btn-secondary" id="gcRecheck">I have done this &mdash; check again</button>
+                            </div>
+                        </div>
+
+                        <!-- ready, but nobody has connected -->
+                        <div class="gc-state" data-for="disconnected">
+                            <div class="gc-head">
+                                <span class="gc-dot gc-dot-idle"></span>
+                                <div>
+                                    <strong>Not connected</strong>
+                                    <p class="gc-muted">Connect a Google account to see which pages Google
+                                       indexed, how they perform in search, and which ones people actually visit.</p>
+                                </div>
+                            </div>
+                            <ul class="gc-scopes" id="gcScopes"></ul>
+                            <p class="gc-muted gc-fineprint">Read-only. Nothing is ever written to your
+                               Google account, and you can disconnect at any time.</p>
+                            <div class="gc-actions">
+                                <button type="button" class="btn btn-primary" id="gcConnect">Connect Google</button>
+                            </div>
+                        </div>
+
+                        <!-- connected -->
+                        <div class="gc-state" data-for="connected">
+                            <div class="gc-head">
+                                <span class="gc-dot gc-dot-ok"></span>
+                                <div>
+                                    <strong>Connected</strong>
+                                    <p class="gc-muted" id="gcAccount"></p>
+                                </div>
+                                <button type="button" class="btn btn-secondary gc-right" id="gcDisconnect">Disconnect</button>
+                            </div>
+
+                            <div class="gc-field">
+                                <label for="gcSite">Search Console property</label>
+                                <select id="gcSite"></select>
+                                <span class="setting-help" id="gcSiteHelp">The site these crawls will be compared against.</span>
+                            </div>
+
+                            <div class="gc-field">
+                                <label for="gcGa">Analytics property</label>
+                                <select id="gcGa"></select>
+                                <span class="setting-help" id="gcGaHelp">Optional. Leave as None to skip Analytics.</span>
+                            </div>
+
+                            <div class="gc-actions">
+                                <button type="button" class="btn btn-primary" id="gcSaveProperty">Save selection</button>
+                            </div>
+                        </div>
+
+                        <!-- something went wrong -->
+                        <div class="gc-state" data-for="error">
+                            <div class="gc-head">
+                                <span class="gc-dot gc-dot-bad"></span>
+                                <div>
+                                    <strong>Something went wrong</strong>
+                                    <p class="gc-muted" id="gcError"></p>
+                                </div>
+                            </div>
+                            <div class="gc-actions">
+                                <button type="button" class="btn btn-secondary" id="gcRetry">Try again</button>
+                            </div>
+                        </div>
+
+                        <p class="gc-note" id="gcNote" hidden></p>
+                    </div>
+                </div>
+
+                <!-- Request Settings -->
+                <div id="requests-settings" class="settings-tab-content">
+                    <h3>HTTP Request Configuration</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="userAgent">User Agent</label>
+                            <input type="text" id="userAgent" value="Toadstone/1.0 (Web Crawler)">
+                            <span class="setting-help">User agent string sent with requests</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="timeout">Request Timeout (seconds)</label>
+                            <input type="number" id="timeout" value="10" min="1" max="120">
+                            <span class="setting-help">How long to wait for a response</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="retries">Retry Attempts</label>
+                            <input type="number" id="retries" value="3" min="0" max="10">
+                            <span class="setting-help">Number of retries for failed requests</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="acceptLanguage">Accept Language</label>
+                            <input type="text" id="acceptLanguage" value="en-US,en;q=0.9">
+                            <span class="setting-help">Preferred language for responses</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="respectRobotsTxt" checked>
+                                Respect robots.txt
+                            </label>
+                            <span class="setting-help">Check robots.txt before crawling</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allowCookies" checked>
+                                Allow Cookies
+                            </label>
+                            <span class="setting-help">Accept and send cookies</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="discoverSitemaps" checked>
+                                Discover Sitemaps
+                            </label>
+                            <span class="setting-help">Automatically find and parse sitemap.xml files (including nested sitemaps)</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enablePageSpeed">
+                                Enable PageSpeed Analysis
+                            </label>
+                            <span class="setting-help">Run Google PageSpeed Insights on homepage and 2 category pages after crawl completes</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <label for="googleApiKey">Google PageSpeed API Key</label>
+                            <input type="password" id="googleApiKey" placeholder="Enter your Google PageSpeed Insights API key">
+                            <span class="setting-help">
+                                API key for higher rate limits (25k requests/day vs limited without key).
+                                <a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank" rel="noopener">Get API key here</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Settings -->
+                <div id="filters-settings" class="settings-tab-content">
+                    <h3>Content Filters</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="includeExtensions">Include File Extensions</label>
+                            <input type="text" id="includeExtensions" value="html,htm,php,asp,aspx,jsp">
+                            <span class="setting-help">Comma-separated list of extensions to crawl</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="excludeExtensions">Exclude File Extensions</label>
+                            <input type="text" id="excludeExtensions" value="pdf,doc,docx,zip,exe,dmg">
+                            <span class="setting-help">Comma-separated list of extensions to skip</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="crawlImages">
+                                Crawl Images
+                            </label>
+                            <span class="setting-help">Fully download images as crawl targets. When off, image status and size are still collected via lightweight HEAD requests</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="maxFileSize">Maximum File Size (MB)</label>
+                            <input type="number" id="maxFileSize" value="50" min="1" max="1000">
+                            <span class="setting-help">Skip files larger than this size</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <label for="includePatterns">Include URL Patterns</label>
+                            <textarea id="includePatterns" rows="3" placeholder="One pattern per line (regex supported)"></textarea>
+                            <span class="setting-help">Only crawl URLs matching these patterns</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <label for="excludePatterns">Exclude URL Patterns</label>
+                            <textarea id="excludePatterns" rows="3" placeholder="One pattern per line (regex supported)"></textarea>
+                            <span class="setting-help">Skip URLs matching these patterns</span>
+                        </div>
+                    </div>
+
+                    <h3 class="settings-section-title">Duplication Detection</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableDuplicationCheck" checked>
+                                Enable Duplication Check
+                            </label>
+                            <span class="setting-help">Detect duplicate content across all crawled pages</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="duplicationThreshold">Duplication Similarity Threshold</label>
+                            <input type="number" id="duplicationThreshold" value="0.85" min="0" max="1" step="0.05">
+                            <span class="setting-help">Content similarity threshold (0.0-1.0). Higher values = stricter matching. Default: 0.85 (85% similar)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Settings -->
+                <div id="export-settings" class="settings-tab-content">
+                    <h3>Export Configuration</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="exportFormat">Default Export Format</label>
+                            <select id="exportFormat">
+                                <option value="csv">CSV</option>
+                                <option value="xlsx">Excel (XLSX)</option>
+                                <option value="json">JSON</option>
+                                <option value="xml">XML</option>
+                            </select>
+                            <span class="setting-help">Default format for data exports</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <label>Export Fields</label>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="url" checked>
+                                    URL
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="status_code" checked>
+                                    Status Code
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="title" checked>
+                                    Title
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="meta_description" checked>
+                                    Meta Description
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="h1" checked>
+                                    H1 Tags
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="keywords">
+                                    Keywords
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="word_count">
+                                    Word Count
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="content_type">
+                                    Content Type
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="response_time">
+                                    Response Time
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="canonical_url">
+                                    Canonical URL
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="og_tags">
+                                    OpenGraph Tags
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="twitter_tags">
+                                    Twitter Cards
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="json_ld">
+                                    JSON-LD Data
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="analytics">
+                                    Analytics Tracking
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="internal_links">
+                                    Internal Links Count
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="external_links">
+                                    External Links Count
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="images">
+                                    Images Count
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="links_detailed">
+                                    Detailed Links Data (separate file)
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="lang">
+                                    Language
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="charset">
+                                    Charset
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="viewport">
+                                    Viewport
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="robots">
+                                    Robots Meta
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="exportFields" value="issues_detected">
+                                    Issues Detected (separate export)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JavaScript Settings -->
+                <div id="javascript-settings" class="settings-tab-content">
+                    <h3>JavaScript Rendering Configuration</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableJavaScript">
+                                Enable JavaScript Rendering
+                            </label>
+                            <span class="setting-help">Render pages with JavaScript for dynamic content (slower but more accurate)</span>
+                        </div>
+
+                        <div class="setting-group" id="jsSettings" style="display: none;">
+                            <label for="jsWaitTime">JavaScript Wait Time (seconds)</label>
+                            <input type="number" id="jsWaitTime" value="3" min="0" max="30" step="0.5">
+                            <span class="setting-help">Time to wait for JavaScript to render after page load</span>
+                        </div>
+
+                        <div class="setting-group" id="jsTimeoutGroup" style="display: none;">
+                            <label for="jsTimeout">Page Load Timeout (seconds)</label>
+                            <input type="number" id="jsTimeout" value="30" min="5" max="120">
+                            <span class="setting-help">Maximum time to wait for page to load</span>
+                        </div>
+
+                        <div class="setting-group" id="jsBrowserGroup" style="display: none;">
+                            <label for="jsBrowser">Browser Engine</label>
+                            <select id="jsBrowser">
+                                <option value="chromium">Chromium (Recommended)</option>
+                                <option value="firefox">Firefox</option>
+                                <option value="webkit">WebKit (Safari)</option>
+                            </select>
+                            <span class="setting-help">Browser engine for JavaScript rendering</span>
+                        </div>
+
+                        <div class="setting-group" id="jsHeadlessGroup" style="display: none;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="jsHeadless" checked>
+                                Headless Mode
+                            </label>
+                            <span class="setting-help">Run browser without visible window (recommended for performance)</span>
+                        </div>
+
+                        <div class="setting-group" id="jsUserAgentGroup" style="display: none;">
+                            <label for="jsUserAgent">JavaScript User Agent</label>
+                            <input type="text" id="jsUserAgent" value="Toadstone/1.0 (Web Crawler with JavaScript)">
+                            <span class="setting-help">User agent string for JavaScript-rendered pages</span>
+                        </div>
+
+                        <div class="setting-group" id="jsViewportGroup" style="display: none;">
+                            <label for="jsViewportWidth">Browser Viewport Size</label>
+                            <div class="field-row">
+                                <input type="number" id="jsViewportWidth" value="1920" min="800" max="4000" placeholder="Width" aria-label="Viewport width">
+                                <span class="field-sep">&times;</span>
+                                <input type="number" id="jsViewportHeight" value="1080" min="600" max="3000" placeholder="Height" aria-label="Viewport height">
+                            </div>
+                            <span class="setting-help">Browser window size for rendering (affects responsive layouts)</span>
+                        </div>
+
+                        <div class="setting-group" id="jsConcurrencyGroup" style="display: none;">
+                            <label for="jsMaxConcurrentPages">Max Concurrent Browser Pages</label>
+                            <input type="number" id="jsMaxConcurrentPages" value="3" min="1" max="10">
+                            <span class="setting-help">Number of browser pages for parallel JavaScript rendering (higher = faster but more memory)</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide" id="jsWarning" style="display: none;">
+                            <div class="callout callout-warning">
+                                <i data-icon="alert-triangle" data-icon-size="14"></i>
+                                <strong>Performance impact</strong><br>
+                                JavaScript rendering is significantly slower than HTTP-only crawling. Use for sites with dynamic content or when static crawling produces incomplete results.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issue Exclusion Settings -->
+                <div id="issues-settings" class="settings-tab-content">
+                    <h3>Issue Exclusion Patterns</h3>
+                    <p class="setting-help">URLs matching these patterns will be excluded from issue detection. These are typically admin areas, development files, and framework internals that should never be indexed by search engines.</p>
+
+                    <div class="settings-grid">
+                        <div class="setting-group setting-group-wide">
+                            <label for="issueExclusionPatterns">Exclusion Patterns (one per line)</label>
+                            <textarea id="issueExclusionPatterns" rows="14" placeholder="/admin/*
+/wp-admin/*
+*.json"></textarea>
+                            <span class="setting-help">Use * for wildcards. Examples: /admin/*, *.json, /test/*</span>
+                            <div class="field-row field-row-actions">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="resetIssueExclusions()"><i data-icon="refresh" data-icon-size="14"></i>Reset to Defaults</button>
+                                <span class="setting-help">Restore the default exclusion patterns</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <div class="callout callout-info">
+                                <i data-icon="info" data-icon-size="14"></i>
+                                <strong>Default exclusions include:</strong><br>
+                                &bull; WordPress admin areas (/wp-admin/*, /wp-content/plugins/*)<br>
+                                &bull; Common admin panels (/admin/*, /administrator/*, /cpanel/*)<br>
+                                &bull; Development files (/.git/*, /node_modules/*, /vendor/*)<br>
+                                &bull; Build and cache directories (/build/*, /cache/*, /tmp/*)<br>
+                                &bull; Configuration files (*.json, *.yaml, *.xml)<br>
+                                &bull; Backup files (*.bak, *.backup, *.old)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom CSS Settings -->
+                <div id="customcss-settings" class="settings-tab-content">
+                    <h3>Custom CSS Styling</h3>
+                    <p class="setting-help">Write custom CSS to personalize the look and feel of the Toadstone interface. Changes apply immediately after saving.</p>
+
+                    <div class="settings-grid">
+                        <div class="setting-group setting-group-wide">
+                            <label for="customCSS">Custom CSS Code</label>
+                            <textarea id="customCSS" rows="14" placeholder="/* Write your custom CSS here */
+/* Example: */
+/* .topbar { background: #101319; } */
+/* .data-table th { background-color: #4f46e5; } */
+/* .btn-primary { background: #10b981; } */"></textarea>
+                            <span class="setting-help">Enter valid CSS rules to customize the interface appearance</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <div class="callout callout-info">
+                                <i data-icon="info" data-icon-size="14"></i>
+                                <strong>CSS tips:</strong><br>
+                                &bull; Target specific elements: <code>.topbar</code>, <code>.data-table</code>, <code>.sidebar</code><br>
+                                &bull; Change colors: <code>background-color</code>, <code>color</code>, <code>border-color</code><br>
+                                &bull; Modify spacing: <code>padding</code>, <code>margin</code>, <code>gap</code><br>
+                                &bull; Adjust fonts: <code>font-family</code>, <code>font-size</code>, <code>font-weight</code><br>
+                                &bull; Override a design token: <code>:root { --accent: #10b981; }</code><br>
+                                &bull; Changes only affect the frontend UI
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings -->
+                <div id="integrations-settings" class="settings-tab-content">
+                    <h3>Link Metrics</h3>
+                    <p class="setting-help setting-help-block">
+                        Off-site authority, from whichever vendor you have a
+                        subscription to. Keys are stored with your settings and
+                        sent only to the vendor they belong to. Without one, the
+                        four authority checks simply do not run &mdash; nothing
+                        is guessed.
+                    </p>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="mozAccessId">Moz Access ID</label>
+                            <input type="text" id="mozAccessId" autocomplete="off" spellcheck="false">
+                            <span class="setting-help">From Moz API settings</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="mozSecretKey">Moz Secret Key</label>
+                            <input type="password" id="mozSecretKey" autocomplete="off">
+                            <span class="setting-help">Stored with your settings, never logged</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="majesticApiKey">Majestic API Key</label>
+                            <input type="password" id="majesticApiKey" autocomplete="off">
+                            <span class="setting-help">Majestic answers errors with HTTP 200, so a bad key reads as a refusal, not a crash</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="ahrefsApiToken">Ahrefs API Token</label>
+                            <input type="password" id="ahrefsApiToken" autocomplete="off">
+                            <span class="setting-help">Site Explorer scope</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="linkMetricsMaxUrls">Max URLs per crawl</label>
+                            <input type="number" id="linkMetricsMaxUrls" min="1" max="5000" value="200">
+                            <span class="setting-help">These calls are billed per URL. This caps what one crawl can spend.</span>
+                        </div>
+                    </div>
+
+                    <h3>MCP server</h3>
+                    <p class="setting-help setting-help-block">
+                        This install speaks the Model Context Protocol, so an
+                        agent can read your crawls instead of you pasting them.
+                        Read-only: it can list crawls, read issues and compare
+                        two crawls, and it cannot start, change or delete one.
+                    </p>
+
+                    <div class="settings-grid">
+                        <div class="setting-group setting-group-wide">
+                            <label for="mcpEndpoint">Endpoint</label>
+                            <input type="text" id="mcpEndpoint" readonly>
+                            <span class="setting-help">
+                                <span id="mcpStatus" class="mcp-status">Checking\u2026</span>
+                            </span>
+                        </div>
+                        <div class="setting-group setting-group-wide">
+                            <label for="mcpSnippet">Client configuration</label>
+                            <textarea id="mcpSnippet" rows="9" readonly spellcheck="false"></textarea>
+                            <span class="setting-help">
+                                Paste into your MCP client's config.
+                                <button type="button" class="btn btn-ghost btn-sm" onclick="copyMcpSnippet()">Copy</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="advanced-settings" class="settings-tab-content">
+                    <h3>Advanced Configuration</h3>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="concurrency">Concurrent Requests</label>
+                            <input type="number" id="concurrency" value="5" min="1" max="50">
+                            <span class="setting-help">Number of simultaneous requests (higher = faster but more resource intensive)</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="memoryLimit">Memory Limit (MB)</label>
+                            <input type="number" id="memoryLimit" value="512" min="64" max="4096">
+                            <span class="setting-help">Maximum memory usage for crawl data</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="logLevel">Log Level</label>
+                            <select id="logLevel">
+                                <option value="DEBUG">Debug</option>
+                                <option value="INFO" selected>Info</option>
+                                <option value="WARNING">Warning</option>
+                                <option value="ERROR">Error</option>
+                            </select>
+                            <span class="setting-help">Logging verbosity level</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="saveSession">
+                                Save Session Data
+                            </label>
+                            <span class="setting-help">Automatically save crawl data between sessions</span>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableProxy">
+                                Enable Proxy
+                            </label>
+                            <span class="setting-help">Route requests through a proxy server</span>
+                        </div>
+
+                        <div class="setting-group" id="proxySettings" style="display: none;">
+                            <label for="proxyUrl">Proxy URL</label>
+                            <input type="text" id="proxyUrl" placeholder="http://proxy.example.com:8080">
+                            <span class="setting-help">Proxy server URL with port</span>
+                        </div>
+
+                        <div class="setting-group setting-group-wide">
+                            <label for="customHeaders">Custom Headers</label>
+                            <textarea id="customHeaders" rows="4" placeholder="Header-Name: Header-Value&#10;Another-Header: Another-Value"></textarea>
+                            <span class="setting-help">Additional HTTP headers to send (one per line)</span>
+                        </div>
+                    </div>
+
+                    <h3>AI agents</h3>
+                    <p class="setting-help setting-help-block">Some judgements a rule cannot make &mdash; whether a page
+                       actually answers the query it targets, whether two pages really compete. Off by
+                       default: turning it on sends page text to a model and costs money.</p>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="agentMode">Agent mode</label>
+                            <select id="agentMode">
+                                <option value="none">Off &mdash; no model is used</option>
+                                <option value="api">Anthropic API &mdash; billed per call</option>
+                                <option value="cli">Local Claude CLI &mdash; uses that account</option>
+                            </select>
+                            <span class="setting-help" id="agentModeHelp">Agent findings are skipped entirely.</span>
+                        </div>
+
+                        <div class="setting-group agent-setting" id="agentModelGroup">
+                            <label for="agentModel">Model</label>
+                            <input type="text" id="agentModel" placeholder="claude-sonnet-5-5">
+                            <span class="setting-help">These are short judgements about one page at a time,
+                                  so Sonnet answers them well for much less than Opus.</span>
+                        </div>
+
+                        <div class="setting-group agent-setting" id="agentMaxPagesGroup">
+                            <label for="agentMaxPages">Maximum pages per crawl</label>
+                            <input type="number" id="agentMaxPages" min="1" max="500" value="25">
+                            <span class="setting-help">Agents are slow and priced per page. This caps how many
+                                  pages of any one crawl are ever sent.</span>
+                        </div>
+
+                        <div class="setting-group agent-setting setting-group-wide" id="agentCliCommandGroup">
+                            <label for="agentCliCommand">CLI command</label>
+                            <input type="text" id="agentCliCommand" placeholder="claude">
+                            <span class="setting-help">In Docker the Claude CLI cannot run inside the container,
+                                  because it is a native binary for the host. Run
+                                  <code>tools/claude_bridge.py</code> on the host and set this to
+                                  <code>/app/tools/claude_bridge_client.py</code>. See docs/agents.md.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="resetSettings()">Reset to Defaults</button>
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()"><i data-icon="check" data-icon-size="14"></i>Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="/static/js/icons.js"></script>
+    <script src="/static/js/incremental_poller.js"></script>
+    <script src="/static/js/virtual-scroller.js"></script>
+    <script src="/static/js/column-resize.js"></script>
+    <script src="/static/js/visualization.js"></script>
+    <script src="/static/js/plugin-loader.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/settings.js"></script>
+    <script src="/static/js/google-connect.js"></script>
+    <script src="/static/js/page-detail.js"></script>
+    <script src="/static/js/reports.js"></script>
+    <script src="/static/js/router.js"></script>
+    <script src="/static/js/nav.js"></script>
+    <script src="/static/js/palette.js"></script>
+    <script src="/static/js/commands.js"></script>
+    <script src="/static/js/integrations.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+name: False positive from a check
+description: A check fired on a page where it should not have
+labels: [false-positive]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        These are the most valuable reports this project gets. Every check here
+        is supposed to have been seen firing on a real crawl, and a false
+        positive means a check is reading something it should not.
+  - type: input
+    id: check
+    attributes:
+      label: Check slug
+      description: From the finding, e.g. `rendered_hidden_text`
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes:
+      label: The finding
+      description: Paste the whole finding JSON if you can — `id`, `evidence`, `details`.
+      render: json
+    validations: {required: true}
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it is wrong
+      description: What the page actually does, and why the check's reading of it is mistaken.
+    validations: {required: true}
+  - type: textarea
+    id: html
+    attributes:
+      label: The markup it fired on
+      description: The smallest fragment that still triggers it.
+      render: html

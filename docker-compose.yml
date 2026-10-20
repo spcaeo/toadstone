@@ -1,0 +1,80 @@
+services:
+  toadstone:
+    build: .
+    # Named explicitly: without this, Compose derives the image name from
+    # whatever the containing folder happens to be called, so the docs and the
+    # machine disagree the moment someone clones into a different directory.
+    image: toadstone:latest
+    container_name: toadstone
+    ports:
+      # In local mode: only localhost (127.0.0.1:5000)
+      # In production mode: all interfaces (0.0.0.0:5000) for LAN/WAN access
+      - "${HOST_BINDING:-127.0.0.1}:${EXTERNAL_PORT:-5000}:5000"
+    volumes:
+      # Persist the user database and settings
+      - ./data:/app/data
+    environment:
+      - FLASK_APP=main.py
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=${SECRET_KEY:-}
+      # Set to "true" for local mode (no authentication), "false" for production
+      # Defaults to "false" — local mode disables all auth and grants admin to everyone
+      - LOCAL_MODE=${LOCAL_MODE:-false}
+      # Set to "true" to disable new user registrations
+      - REGISTRATION_DISABLED=${REGISTRATION_DISABLED:-false}
+      # Set to "true" for demo mode (1.5GB per-user memory limit)
+      - DEMO_MODE=${DEMO_MODE:-false}
+      # DANGEROUS: Set to "true" to allow login as any username with no password
+      # (username only used to separate sessions). Do NOT use in production.
+      - DANGEROUSLY_SKIP_AUTH=${DANGEROUSLY_SKIP_AUTH:-false}
+      # Google Search Console and Analytics. Set these in .env to put a
+      # "Connect Google" button in Settings > Google. See docs/google.md.
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      # A Chrome UX Report key, which is free and read-only. Set it to give
+      # every crawl real-user Core Web Vitals without each person pasting
+      # the same string into their own settings. A per-user key in Settings
+      # still wins over this one.
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      # The Claude CLI ships as a native binary for the host OS, so it cannot
+      # run in this container. tools/claude_bridge.py runs it on the host and
+      # answers here. Leave the token empty to keep the agent layer off.
+      - CLAUDE_BRIDGE_URL=${CLAUDE_BRIDGE_URL:-http://host.docker.internal:14898/ask}
+      - CLAUDE_BRIDGE_TOKEN=${CLAUDE_BRIDGE_TOKEN:-}
+      # docs/agents.md describes an `api` agent mode that talks to Anthropic
+      # directly. It could not work in Docker until this was forwarded.
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # Uncomment these for SMTP sending
+      # - SMTP_HOST=${SMTP_HOST}
+      # - SMTP_PORT=${SMTP_PORT}
+      # - SMTP_USER=${SMTP_USER}
+      # - SMTP_PASSWORD=${SMTP_PASSWORD}
+      # - SMTP_FROM=${SMTP_FROM}
+      # - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      # Add this for correct links in the verification emails
+      # - MAIN_APP_URL=${MAIN_APP_URL}
+    # host.docker.internal is built in on Docker Desktop; Linux needs this
+    # line for the Claude bridge to be reachable.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    command: >
+      sh -c "
+      FLAGS='';
+      if [ \"$$LOCAL_MODE\" = \"true\" ]; then
+        FLAGS=\"$$FLAGS --local\";
+      fi;
+      if [ \"$$REGISTRATION_DISABLED\" = \"true\" ]; then
+        FLAGS=\"$$FLAGS --disable-register\";
+      fi;
+      if [ \"$$DEMO_MODE\" = \"true\" ]; then
+        FLAGS=\"$$FLAGS --demo\";
+      fi;
+      if [ \"$$DANGEROUSLY_SKIP_AUTH\" = \"true\" ]; then
+        FLAGS=\"$$FLAGS --dangerously-skip-auth\";
+      fi;
+      python main.py $$FLAGS"
+
+    # Increase shared memory size for Chrome to prevent crashes
+    shm_size: '2gb'
+

@@ -1,0 +1,29 @@
+
+*.pyc
+# __pycache__ was covered only because everything inside it happens to match
+# *.pyc, and .pytest_cache only because pytest writes its own .gitignore in
+# there. Both are now explicit rather than accidental.
+__pycache__/
+.pytest_cache/
+# Windows shortcut files. Four were tracked for months, each embedding a
+# machine's hostname and a D:\ path, shadowing the real .js files beside them.
+*.lnk
+# Claude Code's own working directory: settings, and session transcripts that
+# can run to hundreds of megabytes and contain whatever was discussed.
+.claude/
+users.db
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+.env
+
+# Local working files
+backup/
+data/
+reports/
+.playwright-mcp/
+.DS_Store
+
+# Screenshots taken while working (assets/screens/ is published on purpose)
+/*.png

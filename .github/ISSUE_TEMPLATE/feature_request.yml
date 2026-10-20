@@ -1,0 +1,26 @@
+name: Feature request
+description: Something it should do and does not
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: The job, not the feature. What are you trying to find out about a site?
+    validations: {required: true}
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you do it today
+      description: Another tool, a script, by hand — and what is wrong with that.
+  - type: textarea
+    id: shape
+    attributes:
+      label: What you think it should look like
+      description: Optional. A check slug, an API shape, a screen.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: I have read the comparison table in the README and this is not already covered

@@ -1,0 +1,177 @@
+Toadstone
+Copyright 2026 Space-O Technologies. Author: Rakesh Patel.
+
+Built by LabsMedia (https://www.labsmedia.com/), the digital marketing division
+of Space-O Technologies (https://www.spaceo.ca/).
+
+Toadstone is licensed under the Elastic License 2.0 (ELv2), reproduced in full
+below. In short: use it, self-host it, read it, modify it, redistribute it. You
+may not offer it to third parties as a hosted or managed service, and you may
+not strip these notices. The licensor is Space-O Technologies. For a commercial
+licence - for example, to offer Toadstone to others as a hosted or managed
+service - see https://www.labsmedia.com/contact/
+
+ELv2 is a source-available licence. It is not an OSI-approved open-source
+licence.
+
+
+PORTIONS INHERITED FROM LIBRECRAWL  (MIT License)
+-------------------------------------------------
+
+Toadstone is a fork of LibreCrawl by Phiality. Those portions remain under the
+MIT License, reproduced below, and that licence is what permits this work to be
+distributed under different terms. The MIT grant for the upstream code is not
+revoked by anything above: anyone may still take LibreCrawl from its own
+authors under MIT.
+
+    LibreCrawl - https://librecrawl.com
+    Copyright (c) 2025 Phiality
+    https://github.com/PhialsBasement/LibreCrawl
+
+Which portions, precisely: this fork diverged at upstream commit
+
+    d0ac5058cc0d3a3747ea6983b1a4e8cda356abdf  (2026-09-08)
+
+Everything present in LibreCrawl at that commit is the inherited work and is
+available to you under the MIT License below, from its own authors. The 106
+commits made on top of it are this fork's, and are licensed under the Elastic
+License 2.0 above. Where the two are interleaved inside one file, the MIT
+grant on the inherited lines is not revoked by anything here - MIT permits
+sublicensing, and that is the whole of what makes this arrangement lawful.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+COMPONENTS THE ELASTIC LICENSE 2.0 DOES NOT APPLY TO
+----------------------------------------------------
+
+**The Elastic License 2.0 above does not apply to src/core/vendor/axe.min.js**,
+which is axe-core by Deque Systems, bundled unmodified, and which remains
+available to you under the Mozilla Public License 2.0 on that licence's own
+terms. The full MPL-2.0 text is at src/core/vendor/LICENSE.MPL-2.0, with the
+reasoning in src/core/vendor/README-licensing.md.
+
+The same carve-out applies to any MPL-2.0 component installed as a dependency
+rather than vendored here - at the time of writing, `certifi`, which arrives
+with `requests` and is present in every environment and every container image
+built from this repository.
+
+Nothing in the Elastic License 2.0 is intended to, or does, restrict the rights
+the MPL-2.0 grants you in those files. MPL-2.0 section 3.3 permits distributing
+a Larger Work under terms of your choosing provided the Covered Software stays
+under the MPL and recipients' rights in it are not restricted; this paragraph
+is how that proviso is satisfied, and it governs over anything above that could
+be read otherwise.
+
+See NOTICE for every bundled and third-party component with its licence.
+
+----------------------------------------------------------------------------
+
+Elastic License 2.0
+
+URL: https://www.elastic.co/licensing/elastic-license
+
+## Acceptance
+
+By using the software, you agree to all of the terms and conditions below.
+
+## Copyright License
+
+The licensor grants you a non-exclusive, royalty-free, worldwide,
+non-sublicensable, non-transferable license to use, copy, distribute, make
+available, and prepare derivative works of the software, in each case subject to
+the limitations and conditions below.
+
+## Limitations
+
+You may not provide the software to third parties as a hosted or managed
+service, where the service provides users with access to any substantial set of
+the features or functionality of the software.
+
+You may not move, change, disable, or circumvent the license key functionality
+in the software, and you may not remove or obscure any functionality in the
+software that is protected by the license key.
+
+You may not alter, remove, or obscure any licensing, copyright, or other notices
+of the licensor in the software. Any use of the licensor’s trademarks is subject
+to applicable law.
+
+## Patents
+
+The licensor grants you a license, under any patent claims the licensor can
+license, or becomes able to license, to make, have made, use, sell, offer for
+sale, import and have imported the software, in each case subject to the
+limitations and conditions in this license. This license does not cover any
+patent claims that you cause to be infringed by modifications or additions to
+the software. If you or your company make any written claim that the software
+infringes or contributes to infringement of any patent, your patent license for
+the software granted under these terms ends immediately. If your company makes
+such a claim, your patent license ends immediately for work on behalf of your
+company.
+
+## Notices
+
+You must ensure that anyone who gets a copy of any part of the software from you
+also gets a copy of these terms.
+
+If you modify the software, you must include in any modified copies of the
+software prominent notices stating that you have modified the software.
+
+## No Other Rights
+
+These terms do not imply any licenses other than those expressly granted in
+these terms.
+
+## Termination
+
+If you use the software in violation of these terms, such use is not licensed,
+and your licenses will automatically terminate. If the licensor provides you
+with a notice of your violation, and you cease all violation of this license no
+later than 30 days after you receive that notice, your licenses will be
+reinstated retroactively. However, if you violate these terms after such
+reinstatement, any additional violation of these terms will cause your licenses
+to terminate automatically and permanently.
+
+## No Liability
+
+*As far as the law allows, the software comes as is, without any warranty or
+condition, and the licensor will not be liable to you for any damages arising
+out of these terms or the use or nature of the software, under any kind of
+legal claim.*
+
+## Definitions
+
+The **licensor** is the entity offering these terms, and the **software** is the
+software the licensor makes available under these terms, including any portion
+of it.
+
+**you** refers to the individual or entity agreeing to these terms.
+
+**your company** is any legal entity, sole proprietorship, or other kind of
+organization that you work for, plus all organizations that have control over,
+are under the control of, or are under common control with that
+organization. **control** means ownership of substantially all the assets of an
+entity, or the power to direct its management and policies by vote, contract, or
+otherwise. Control can be direct or indirect.
+
+**your licenses** are all the licenses granted to you for the software under
+these terms.
+
+**use** means anything you do with the software requiring one of your licenses.
+
+**trademark** means trademarks, service marks, and similar rights.

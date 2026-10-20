@@ -1,0 +1,109 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suites:
+    name: Test suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+      - name: Run every suite that does not need a running server
+        run: |
+          failed=""
+          for t in tests/*_tests.py; do
+            case "$t" in
+              tests/palette_tests.py|tests/router_tests.py) continue ;;
+            esac
+            echo "::group::$t"
+            python "$t" || failed="$failed $t"
+            echo "::endgroup::"
+          done
+          if [ -n "$failed" ]; then
+            echo "::error::failing suites:$failed"
+            exit 1
+          fi
+
+  browser:
+    name: Browser suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+      - name: Start Toadstone
+        env:
+          SECRET_KEY: ci-only-not-a-secret
+        run: |
+          python main.py --local --port 5057 > /tmp/toadstone.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://127.0.0.1:5057/ && break
+            sleep 2
+          done
+          curl -sf -o /dev/null http://127.0.0.1:5057/ || { cat /tmp/toadstone.log; exit 1; }
+      - name: Routing and command palette
+        env:
+          TOADSTONE_URL: http://127.0.0.1:5057
+        run: |
+          python tests/palette_tests.py
+          python tests/router_tests.py
+      - name: Server log on failure
+        if: failure()
+        run: cat /tmp/toadstone.log
+
+  coverage:
+    name: Checks proven to fire
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+      - name: Crawl the deliberately broken fixture
+        # No --expect: the harness defaults to 160, and that default was raised
+        # from 120 precisely because 120 passed while every PageSpeed check was
+        # broken. Passing a lower floor here would re-open the hole the default
+        # exists to close. See BUILD-LOG.md.
+        run: python tests/coverage_site.py
+
+  build-log:
+    name: Build log intact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # the check reads every committed version
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python tools/verify_build_log.py

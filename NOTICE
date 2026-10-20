@@ -1,0 +1,126 @@
+Toadstone
+Copyright 2026 Space-O Technologies. Author: Rakesh Patel.
+Built by LabsMedia - https://www.labsmedia.com/
+
+Toadstone itself is licensed under the Elastic License 2.0 (see LICENSE).
+
+This file lists every third-party component that travels with it, and the
+licence each is distributed under. It exists so the obligations that do apply
+are visible rather than buried. None of them restricts Toadstone's own licence,
+and one of them - the MIT grant on the inherited LibreCrawl code - is what
+permits Toadstone to be licensed differently at all.
+
+
+TOADSTONE IS A FORK OF LIBRECRAWL
+-----------------------------
+
+Toadstone is built on LibreCrawl by Phiality, released under the MIT License and
+reproduced in full in LICENSE.
+
+    LibreCrawl — https://librecrawl.com
+    Copyright (c) 2025 Phiality
+    MIT License
+    Forked at d0ac5058cc0d3a3747ea6983b1a4e8cda356abdf (2026-09-08)
+
+The MIT licence asks that the original copyright notice travels with the
+software, and it does: LICENSE reproduces it in full. MIT also permits
+sublicensing, which is what allows the combined work to ship under the Elastic
+License 2.0 - and which changes nothing about the upstream project. Anyone may
+still take LibreCrawl from its own authors under MIT, and nothing here asks
+otherwise.
+
+We are not required to say more than the notice, and we say more than the
+notice because a solo developer's work is the reason this project exists at
+all.
+
+
+BUNDLED SOURCE: AXE-CORE  (Mozilla Public License 2.0)
+------------------------------------------------------
+
+The accessibility checks use axe-core, which is distributed under the MPL-2.0
+rather than a permissive licence. It is named first because it is the one
+copyleft component we bundle *in this repository* rather than install.
+
+    axe-core 4.10.2 — https://github.com/dequelabs/axe-core
+    Copyright (c) 2015-2024 Deque Systems, Inc.
+    Mozilla Public License, v. 2.0 — https://mozilla.org/MPL/2.0/
+
+    Bundled at: src/core/vendor/axe.min.js
+
+MPL-2.0 is file-level copyleft. It does not affect Toadstone's own source. It
+does require that this file remains under the MPL-2.0 with its licence header
+intact, and that if we modify it, the modified source is made available. We
+ship it unmodified.
+
+**The Elastic License 2.0 does not apply to axe.min.js.** It remains available
+to you under the MPL-2.0, and nothing in Toadstone's own licence restricts the
+rights that grants you - which is not generosity but MPL-2.0 section 3.3's
+condition for distributing a Larger Work under other terms. The full MPL text
+ships at src/core/vendor/LICENSE.MPL-2.0.
+
+axe-core is not, however, the only MPL-2.0 component that travels with this
+software, which this file claimed until 2026-10-20 and which was wrong:
+
+    certifi              Mozilla Public License 2.0
+
+certifi is a required dependency of `requests`, so it is installed in every
+environment and baked into every Docker image built from this repository. The
+same file-level copyleft applies, with the same effect: none on Toadstone's own
+code.
+
+
+PYTHON DEPENDENCIES
+-------------------
+
+    requests             Apache-2.0
+    bcrypt               Apache-2.0
+    playwright           Apache-2.0
+    cryptography         Apache-2.0 OR BSD-3-Clause
+    flask                BSD-3-Clause
+    psutil               BSD-3-Clause
+    lxml                 BSD-3-Clause
+    python-dotenv        BSD-3-Clause
+    markdown             BSD-3-Clause
+    nest-asyncio         BSD-2-Clause
+    beautifulsoup4       MIT
+    urllib3              MIT
+    flask-compress       MIT
+    openpyxl             MIT
+    waitress             ZPL-2.1
+
+All of the above are permissive: they ask for attribution and a copy of their
+licence text, and none places conditions on Toadstone's own code.
+
+That list is the direct dependencies in `requirements.txt`. Installing them
+pulls in their own: Jinja2, Werkzeug, MarkupSafe, itsdangerous, click and idna
+(BSD-3-Clause), charset-normalizer, soupsieve, pyee and et-xmlfile (MIT),
+greenlet, cffi and pycparser (MIT / PSF / Apache-2.0), and certifi (MPL-2.0,
+above). None is copyleft except certifi.
+
+For a `pip install`, each licence travels with its package. **A published
+Docker image is a binary redistribution**, and must carry those licence texts
+with it — including the NOTICE files that Apache-2.0 section 4 requires. If you
+publish an image built from this repository, that obligation is yours, and the
+licence texts are already inside the image under `site-packages`.
+
+
+OPTIONAL SERVICES
+-----------------
+
+Toadstone can talk to services that are not bundled with it and are governed by
+their own terms, not by this licence. None is required, and none is contacted
+unless configured:
+
+    Google Search Console API, Google Analytics Data API
+    Google PageSpeed Insights / CrUX
+    LanguageTool
+    Moz, Majestic, Ahrefs
+    Anthropic (the optional agent layer)
+
+
+TRADEMARKS
+----------
+
+"LibreCrawl" is the name of the upstream project. The MIT licence grants no
+trademark rights, and Toadstone makes no claim to that name and is not endorsed
+by or affiliated with Phiality.

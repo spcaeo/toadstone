@@ -1,0 +1,21 @@
+hero-light	130KB	Findings grouped by check
+hero-dark	131KB	The same, dark
+checks-collapsed	130KB	Every check that fired, with its slug and count
+overview	265KB	Every crawled URL with its SEO fields
+internal	286KB	Internal URLs
+status-codes	82KB	Status codes
+links	239KB	Inbound and outbound links per page
+visualization	588KB	Site structure
+sitemap	113KB	Sitemap audit and coverage
+pagespeed	96KB	PageSpeed and Core Web Vitals
+compare	82KB	Crawl-to-crawl comparison
+rules	159KB	User-defined consistency rules
+about	225KB	What a toadstone was, and why this is named after one
+licence	204KB	The licence in plain words: what you may and may not do
+mega-menu	271KB	The menu, grouped by what you are trying to do
+mega-menu-dark	271KB	The menu, dark
+command-palette	265KB	Every action, searchable
+settings-google	256KB	Connecting a Google account, scope by scope
+settings-crawler	293KB	Crawler settings
+server-logs	264KB	Server log analysis
+fixer	233KB	Findings turned into one brief
