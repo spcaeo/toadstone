@@ -90,11 +90,15 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps chromium
       - name: Crawl the deliberately broken fixture
-        # No --expect: the harness defaults to 160, and that default was raised
-        # from 120 precisely because 120 passed while every PageSpeed check was
-        # broken. Passing a lower floor here would re-open the hole the default
-        # exists to close. See BUILD-LOG.md.
-        run: python tests/coverage_site.py
+        # Through the sweep tool, not the harness directly: the harness exits 2
+        # unless TOADSTONE_SLUG_LOG is set, because the slug log is the whole
+        # point of it. Calling it bare is how this job failed on its first run.
+        #
+        # --only default keeps CI to one crawl; the other five modes take about
+        # fifteen minutes between them and belong in a scheduled run, not on
+        # every push. The floor is the harness's own default of 160, raised
+        # from 120 after 120 passed while every PageSpeed check was broken.
+        run: python tools/coverage_sweep.py --only default --expect 160
 
   build-log:
     name: Build log intact

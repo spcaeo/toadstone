@@ -13,6 +13,9 @@ This one is named after that, on purpose.
 [![Checks observed firing](https://img.shields.io/badge/checks%20observed%20firing-180%20in%20one%20sweep-2f6f4e)](#the-number-that-matters)
 [![Self-hosted](https://img.shields.io/badge/self--hosted-docker-2496ed)](#quick-start)
 [![Fork of LibreCrawl](https://img.shields.io/badge/fork%20of-LibreCrawl%20(MIT)-6b7280)](https://github.com/PhialsBasement/LibreCrawl)
+[![Live demo](https://img.shields.io/badge/live%20demo-no%20sign--up-e0b254)](https://spcaeo.github.io/toadstone/)
+
+**[▶ Live demo — a real crawl, no sign-up](https://spcaeo.github.io/toadstone/)**
 
 [Quick start](#quick-start) ·
 [What it finds](#what-it-finds) ·
@@ -164,6 +167,12 @@ Two things in there do more work than they look like they do:
 ![Toadstone crawling freshlycited.com: a URL typed in, 141 pages streaming through, then the findings grouped by check](assets/demo.gif)
 
 <div align="center"><sub>A real crawl of <a href="https://freshlycited.com/">freshlycited.com</a>, time-lapsed. Nothing staged: the URL is typed, the counters climb, and the findings at the end are the ones it actually found.</sub></div>
+
+**[See the full report from this crawl →](https://spcaeo.github.io/toadstone/)** ·
+**[Watch the 40-second launch video →](assets/video/launch.mp4)**
+Every finding, grouped by check, with its evidence and its fix. No sign-up,
+nothing to install — it is the app's own output, exported by
+`tools/build_demo_site.py` and published from `gh-pages`.
 
 ---
 
@@ -844,7 +853,7 @@ Honest about what is not here yet.
 | **[docs/demo/video-script.md](docs/demo/video-script.md)** | The demo video, scene by scene, with the rule that no claim appears in it the repository cannot back |
 | **[docs/demo/launch-post.md](docs/demo/launch-post.md)** | The launch narrative — long, short and one-line — plus the claims we deliberately do not make |
 | **[docs/about-the-name.md](docs/about-the-name.md)** | Why a fake medieval gem is the right name for a crawler, and the audit that earned it |
-| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 148 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
+| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 151 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
 | **[CHANGELOG.md](CHANGELOG.md)** | What changed and when, with the known problems listed rather than omitted |
 | **[FORK.md](FORK.md)** | Exactly what this fork adds on top of LibreCrawl |
 | **[SECURITY.md](SECURITY.md)** · **[CONTRIBUTING.md](CONTRIBUTING.md)** · **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | How to report a vulnerability, how to get a change merged, and how to behave |

@@ -27,3 +27,7 @@ reports/
 
 # Screenshots taken while working (assets/screens/ is published on purpose)
 /*.png
+
+# The generated demo site is published from the gh-pages branch,
+# not from main. Keep the generator, not its output.
+demo-site/
