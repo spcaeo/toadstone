@@ -14,8 +14,26 @@ This one is named after that, on purpose.
 [![Self-hosted](https://img.shields.io/badge/self--hosted-docker-2496ed)](#quick-start)
 [![Live demo](https://img.shields.io/badge/live%20demo-no%20sign--up-e0b254)](https://spcaeo.github.io/toadstone/)
 
-**[▶ Live demo — the real app, a real crawl, no sign-up](https://spcaeo.github.io/toadstone/)** ·
-**[Watch the 100-second tour](https://spcaeo.github.io/toadstone/watch.html)**
+<table>
+<tr>
+<td width="50%" align="center">
+
+### [▶&nbsp; Open the live demo](https://spcaeo.github.io/toadstone/)
+
+**The real interface**, frozen over a real crawl.<br>
+Click the tabs. Open a finding. No sign-up.
+
+</td>
+<td width="50%" align="center">
+
+### [🎬&nbsp; Watch the tour](https://spcaeo.github.io/toadstone/watch.html)
+
+**Two minutes.** Why it exists, what it found,<br>
+and every view in the app.
+
+</td>
+</tr>
+</table>
 
 [Why this exists](#why-this-exists) ·
 [Quick start](#quick-start) ·
@@ -55,6 +73,16 @@ open, read and turn into tickets.
 
 Nothing available had that shape. So I forked an open-source crawler and
 started building.
+
+```bash
+claude mcp add toadstone -- python -m src.mcp
+```
+
+That is the whole integration. Ten tools, read-only by default, **unmetered —
+because they are your crawls, on your machine**. "Crawl freshlycited.com and
+tell me what to fix" comes back as findings grouped by check, each with its
+evidence and a one-line fix, ready to become tickets. No credits, no units, no
+per-seat anything. [See the tools →](docs/mcp.md)
 
 ### Then I found something I was not looking for
 
@@ -175,8 +203,9 @@ Two things in there do more work than they look like they do:
 
 <div align="center"><sub>A real crawl of <a href="https://freshlycited.com/">freshlycited.com</a>, time-lapsed. Nothing staged: the URL is typed, the counters climb, and the findings at the end are the ones it actually found.</sub></div>
 
-**[See the full report from this crawl →](https://spcaeo.github.io/toadstone/)** ·
-**[Watch the 100-second tour →](https://spcaeo.github.io/toadstone/watch.html)**
+**[Open this crawl in the live demo →](https://spcaeo.github.io/toadstone/)** — the
+real interface, not a report. Click anything; starting a new crawl is the one
+thing it cannot do.
 **It is the actual interface**, frozen over a real crawl — the same templates,
 stylesheet and JavaScript, with every API response captured and replayed. Tabs
 switch, filters filter, findings expand, the command palette opens. Starting a
@@ -874,7 +903,7 @@ Honest about what is not here yet.
 | **[docs/demo/video-script.md](docs/demo/video-script.md)** | The demo video, scene by scene, with the rule that no claim appears in it the repository cannot back |
 | **[docs/demo/launch-post.md](docs/demo/launch-post.md)** | The launch narrative — long, short and one-line — plus the claims we deliberately do not make |
 | **[docs/about-the-name.md](docs/about-the-name.md)** | Why a fake medieval gem is the right name for a crawler, and the audit that earned it |
-| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 156 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
+| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 159 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
 | **[CHANGELOG.md](CHANGELOG.md)** | What changed and when, with the known problems listed rather than omitted |
 | **[FORK.md](FORK.md)** | Exactly what this fork adds on top of LibreCrawl |
 | **[SECURITY.md](SECURITY.md)** · **[CONTRIBUTING.md](CONTRIBUTING.md)** · **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | How to report a vulnerability, how to get a change merged, and how to behave |
