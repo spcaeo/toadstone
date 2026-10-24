@@ -26,16 +26,16 @@ that is a gap in the fixture, recorded rather than hidden.
 |---|---|---|---|
 | ✅ | **AMP Boilerplate Missing**<br><code>amp_boilerplate_missing</code> | 🔴 error | Paste the boilerplate from the AMP specification into the head, unchanged. |
 | ✅ | **AMP Page Has No Canonical**<br><code>amp_canonical_missing</code> | 🔴 error | Add a rel=canonical link pointing at the non-AMP page, or at this page. |
-| ✅ | **AMP Charset Missing**<br><code>amp_charset_missing</code> | 🔴 error | Make <meta charset="utf-8"> the first element in the head. |
+| ✅ | **AMP Charset Missing**<br><code>amp_charset_missing</code> | 🔴 error | Make `<meta charset="utf-8">` the first element in the head. |
 | ✅ | **Author JavaScript in AMP**<br><code>amp_custom_javascript</code> | 🔴 error | Remove the script, or express the behaviour with an AMP component. |
-| ✅ | **External Stylesheet in AMP**<br><code>amp_external_stylesheet</code> | 🔴 error | Inline the CSS into <style amp-custom> and remove the stylesheet link. |
+| ✅ | **External Stylesheet in AMP**<br><code>amp_external_stylesheet</code> | 🔴 error | Inline the CSS into `<style amp-custom>` and remove the stylesheet link. |
 | ✅ | **Tag Not Allowed in AMP**<br><code>amp_forbidden_tag</code> | 🔴 error | Swap each tag for its AMP component and load that component's extension script. |
-| ✅ | **Inline style Attribute in AMP**<br><code>amp_inline_style</code> | 🔴 error | Move those declarations into the <style amp-custom> block as classes. |
-| ✅ | **More Than One amp-custom Block**<br><code>amp_multiple_custom_styles</code> | 🔴 error | Merge every custom style into one <style amp-custom> block. |
-| ✅ | **AMP Runtime Not Loaded**<br><code>amp_runtime_missing</code> | 🔴 error | Add <script async src="https://cdn.ampproject.org/v0.js"></script> to the head. |
-| ✅ | **AMP Viewport Missing**<br><code>amp_viewport_missing</code> | 🔴 error | Add <meta name="viewport" content="width=device-width"> to the head. |
+| ✅ | **Inline style Attribute in AMP**<br><code>amp_inline_style</code> | 🔴 error | Move those declarations into the `<style amp-custom>` block as classes. |
+| ✅ | **More Than One amp-custom Block**<br><code>amp_multiple_custom_styles</code> | 🔴 error | Merge every custom style into one `<style amp-custom>` block. |
+| ✅ | **AMP Runtime Not Loaded**<br><code>amp_runtime_missing</code> | 🔴 error | Add `<script async src="https://cdn.ampproject.org/v0.js"></script>` to the head. |
+| ✅ | **AMP Viewport Missing**<br><code>amp_viewport_missing</code> | 🔴 error | Add `<meta name="viewport" content="width=device-width">` to the head. |
 | ✅ | **AMP Link Points at a Page That Is Not AMP**<br><code>amphtml_target_not_amp</code> | 🔴 error | Point rel=amphtml at the real AMP page, or remove the link. |
-| ✅ | **Canonical Page Does Not Link Back to the AMP Version**<br><code>amphtml_missing_canonical</code> | 🟠 warning | Add <link rel="amphtml" href="..."> to the canonical page. |
+| ✅ | **Canonical Page Does Not Link Back to the AMP Version**<br><code>amphtml_missing_canonical</code> | 🟠 warning | Add `<link rel="amphtml" href="...">` to the canonical page. |
 |  | **AMP Version Was Not Crawled**<br><code>amphtml_target_not_crawled</code> | 🔵 info | Include the AMP URL in the crawl, or check it separately. |
 
 ## Accessibility  <sub>11 checks</sub>
@@ -44,8 +44,8 @@ that is a gap in the fixture, recorded rather than hidden.
 |---|---|---|---|
 | ✅ | **Buttons must have discernible text**<br><code>a11y_button-name</code> | 🔴 error | Buttons must have discernible text |
 | ✅ | **Elements must meet minimum color contrast ratio thresholds**<br><code>a11y_color-contrast</code> | 🔴 error | Elements must meet minimum color contrast ratio thresholds |
-| ✅ | **Documents must have <title> element to aid in navigation**<br><code>a11y_document-title</code> | 🔴 error | Documents must have <title> element to aid in navigation |
-| ✅ | **<html> element must have a lang attribute**<br><code>a11y_html-has-lang</code> | 🔴 error | <html> element must have a lang attribute |
+| ✅ | **Documents must have `<title>` element to aid in navigation**<br><code>a11y_document-title</code> | 🔴 error | Documents must have `<title>` element to aid in navigation |
+| ✅ | **`<html>` element must have a lang attribute**<br><code>a11y_html-has-lang</code> | 🔴 error | `<html>` element must have a lang attribute |
 | ✅ | **Images must have alternative text**<br><code>a11y_image-alt</code> | 🔴 error | Images must have alternative text |
 | ✅ | **Form elements must have labels**<br><code>a11y_label</code> | 🔴 error | Form elements must have labels |
 | ✅ | **Links must have discernible text**<br><code>a11y_link-name</code> | 🔴 error | Links must have discernible text |
@@ -193,15 +193,15 @@ that is a gap in the fixture, recorded rather than hidden.
 |  | **Sitemap/Canonical Mismatch**<br><code>sitemap_canonical_mismatch</code> | 🟠 warning | Emit the exact canonical URL in the sitemap, character for character. |
 | ✅ | **Duplicate URL in Sitemaps**<br><code>sitemap_duplicate_urls</code> | 🟠 warning | List each URL in exactly one sitemap file, once. |
 | ✅ | **Inconsistent Trailing Slashes**<br><code>sitemap_inconsistent_trailing_slash</code> | 🟠 warning | Pick one trailing-slash convention and list only canonical URLs in that form. |
-| ✅ | **Most Sitemap Entries Have No lastmod**<br><code>sitemap_lastmod_coverage_low</code> | 🟠 warning | Emit an accurate <lastmod> for every URL from the CMS's modified date. |
+| ✅ | **Most Sitemap Entries Have No lastmod**<br><code>sitemap_lastmod_coverage_low</code> | 🟠 warning | Emit an accurate `<lastmod>` for every URL from the CMS's modified date. |
 | ✅ | **lastmod in the Future**<br><code>sitemap_lastmod_future</code> | 🟠 warning | Emit the real modified date; a future date makes the signal worthless. |
-| ✅ | **Malformed lastmod**<br><code>sitemap_lastmod_malformed</code> | 🟠 warning | Write <lastmod> as YYYY-MM-DD or a full W3C datetime with a timezone offset. |
+| ✅ | **Malformed lastmod**<br><code>sitemap_lastmod_malformed</code> | 🟠 warning | Write `<lastmod>` as YYYY-MM-DD or a full W3C datetime with a timezone offset. |
 |  | **lastmod Not Updated**<br><code>sitemap_lastmod_not_bumped</code> | 🟠 warning | Make the CMS write the real modified date into the sitemap when content is edited. |
 |  | **No Readable Sitemap**<br><code>sitemap_missing</code> | 🟠 warning | Publish an XML sitemap and declare it with a Sitemap: line in robots.txt. |
 | ✅ | **Mixed Hostnames in Sitemap**<br><code>sitemap_mixed_hosts</code> | 🟠 warning | List every URL on the canonical hostname only. |
 | ✅ | **Sitemap Index Nested Too Deep**<br><code>sitemap_nested_index</code> | 🟠 warning | Flatten the sitemap tree: an index must point directly at URL sitemaps. |
 | ✅ | **Sitemap URL Redirects**<br><code>sitemap_url_redirects</code> | 🟠 warning | List the final destination URL in the sitemap instead of the redirecting one. |
-| ✅ | **Missing lastmod**<br><code>sitemap_lastmod_missing</code> | 🔵 info | Emit <lastmod> from the CMS modified date for every entry. |
+| ✅ | **Missing lastmod**<br><code>sitemap_lastmod_missing</code> | 🔵 info | Emit `<lastmod>` from the CMS modified date for every entry. |
 | ✅ | **Crawled Page Missing From Sitemap**<br><code>sitemap_missing_crawled_url</code> | 🔵 info | Add these URLs to the sitemap, or mark them noindex if they should not be indexed. |
 | ✅ | **Sitemap URL Not Crawled**<br><code>sitemap_url_not_crawled</code> | 🔵 info | Check that these URLs are linked from the site, or raise the crawl limit. |
 

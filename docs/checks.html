@@ -64,7 +64,7 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>AMP Charset Missing</strong><br><code>amp_charset_missing</code></td>
 <td>🔴 error</td>
-<td>Make &lt;meta charset=&quot;utf-8&quot;&gt; the first element in the head.</td>
+<td>Make <code>&lt;meta charset=&quot;utf-8&quot;&gt;</code> the first element in the head.</td>
 </tr>
 <tr>
 <td>✅</td>
@@ -76,7 +76,7 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>External Stylesheet in AMP</strong><br><code>amp_external_stylesheet</code></td>
 <td>🔴 error</td>
-<td>Inline the CSS into &lt;style amp-custom&gt; and remove the stylesheet link.</td>
+<td>Inline the CSS into <code>&lt;style amp-custom&gt;</code> and remove the stylesheet link.</td>
 </tr>
 <tr>
 <td>✅</td>
@@ -88,25 +88,25 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>Inline style Attribute in AMP</strong><br><code>amp_inline_style</code></td>
 <td>🔴 error</td>
-<td>Move those declarations into the &lt;style amp-custom&gt; block as classes.</td>
+<td>Move those declarations into the <code>&lt;style amp-custom&gt;</code> block as classes.</td>
 </tr>
 <tr>
 <td>✅</td>
 <td><strong>More Than One amp-custom Block</strong><br><code>amp_multiple_custom_styles</code></td>
 <td>🔴 error</td>
-<td>Merge every custom style into one &lt;style amp-custom&gt; block.</td>
+<td>Merge every custom style into one <code>&lt;style amp-custom&gt;</code> block.</td>
 </tr>
 <tr>
 <td>✅</td>
 <td><strong>AMP Runtime Not Loaded</strong><br><code>amp_runtime_missing</code></td>
 <td>🔴 error</td>
-<td>Add &lt;script async src=&quot;https://cdn.ampproject.org/v0.js&quot;&gt;&lt;/script&gt; to the head.</td>
+<td>Add <code>&lt;script async src=&quot;https://cdn.ampproject.org/v0.js&quot;&gt;&lt;/script&gt;</code> to the head.</td>
 </tr>
 <tr>
 <td>✅</td>
 <td><strong>AMP Viewport Missing</strong><br><code>amp_viewport_missing</code></td>
 <td>🔴 error</td>
-<td>Add &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt; to the head.</td>
+<td>Add <code>&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt;</code> to the head.</td>
 </tr>
 <tr>
 <td>✅</td>
@@ -118,7 +118,7 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>Canonical Page Does Not Link Back to the AMP Version</strong><br><code>amphtml_missing_canonical</code></td>
 <td>🟠 warning</td>
-<td>Add &lt;link rel=&quot;amphtml&quot; href=&quot;...&quot;&gt; to the canonical page.</td>
+<td>Add <code>&lt;link rel=&quot;amphtml&quot; href=&quot;...&quot;&gt;</code> to the canonical page.</td>
 </tr>
 <tr>
 <td></td>
@@ -153,15 +153,15 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 </tr>
 <tr>
 <td>✅</td>
-<td><strong>Documents must have &lt;title&gt; element to aid in navigation</strong><br><code>a11y_document-title</code></td>
+<td><strong>Documents must have <code>&lt;title&gt;</code> element to aid in navigation</strong><br><code>a11y_document-title</code></td>
 <td>🔴 error</td>
-<td>Documents must have &lt;title&gt; element to aid in navigation</td>
+<td>Documents must have <code>&lt;title&gt;</code> element to aid in navigation</td>
 </tr>
 <tr>
 <td>✅</td>
-<td><strong>&lt;html&gt; element must have a lang attribute</strong><br><code>a11y_html-has-lang</code></td>
+<td><strong><code>&lt;html&gt;</code> element must have a lang attribute</strong><br><code>a11y_html-has-lang</code></td>
 <td>🔴 error</td>
-<td>&lt;html&gt; element must have a lang attribute</td>
+<td><code>&lt;html&gt;</code> element must have a lang attribute</td>
 </tr>
 <tr>
 <td>✅</td>
@@ -828,7 +828,7 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>Most Sitemap Entries Have No lastmod</strong><br><code>sitemap_lastmod_coverage_low</code></td>
 <td>🟠 warning</td>
-<td>Emit an accurate &lt;lastmod&gt; for every URL from the CMS's modified date.</td>
+<td>Emit an accurate <code>&lt;lastmod&gt;</code> for every URL from the CMS's modified date.</td>
 </tr>
 <tr>
 <td>✅</td>
@@ -840,7 +840,7 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>Malformed lastmod</strong><br><code>sitemap_lastmod_malformed</code></td>
 <td>🟠 warning</td>
-<td>Write &lt;lastmod&gt; as YYYY-MM-DD or a full W3C datetime with a timezone offset.</td>
+<td>Write <code>&lt;lastmod&gt;</code> as YYYY-MM-DD or a full W3C datetime with a timezone offset.</td>
 </tr>
 <tr>
 <td></td>
@@ -876,7 +876,7 @@ that is a gap in the fixture, recorded rather than hidden.</p>
 <td>✅</td>
 <td><strong>Missing lastmod</strong><br><code>sitemap_lastmod_missing</code></td>
 <td>🔵 info</td>
-<td>Emit &lt;lastmod&gt; from the CMS modified date for every entry.</td>
+<td>Emit <code>&lt;lastmod&gt;</code> from the CMS modified date for every entry.</td>
 </tr>
 <tr>
 <td>✅</td>
