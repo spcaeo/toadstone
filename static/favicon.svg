@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Toadstone">
+  <title>Toadstone</title>
+  <!--
+    Two toads leaning in, with the stone between them.
+
+    Drawn as solid silhouettes rather than strokes: at 16px, where the tab
+    favicon actually lives, a 1.5px outline turns to grey mush and two
+    outlined animals read as one smudge. Filled domes with eye bumps keep a
+    recognisable profile all the way down.
+
+    The toads are the accent colour and the stone is warm, because the stone
+    is the part that means something — a toadstone was worn to detect poison,
+    and it was supposed to change colour when it found some. It is the only
+    element here allowed to be a different hue.
+
+    The tile follows the OS theme: near-black by default, a shade lighter in
+    light mode so the mark does not glare on a white tab strip.
+  -->
+  <style>
+    .tile  { fill: #0d0f14; }
+    .toad  { fill: #7c7ff2; }
+    .eye   { fill: #0d0f14; }
+    .stone { fill: #e0b254; }
+    @media (prefers-color-scheme: light) {
+      .tile  { fill: #16181d; }
+      .toad  { fill: #8f92f5; }
+      .eye   { fill: #16181d; }
+      .stone { fill: #edc062; }
+    }
+  </style>
+
+  <rect class="tile" width="32" height="32" rx="7"/>
+
+  <!--
+    Each toad leans toward the other by four degrees, pivoting on its own
+    base. Seven degrees, tried first, tipped the flat bottoms far enough off
+    the horizontal that it read as a drawing error rather than a lean.
+    The mouth is cut in the tile colour: a wide mouth is the one feature that
+    says "frog" rather than "bird", and without it these were two penguins.
+  -->
+  <g transform="rotate(4 9 25)">
+    <path class="toad" d="M2.6 25 q0 -8.2 6.4 -8.2 q6.4 0 6.4 8.2 z"/>
+    <circle class="toad" cx="5.9" cy="16.6" r="2.5"/>
+    <circle class="toad" cx="11.5" cy="16.2" r="2.5"/>
+    <circle class="eye" cx="5.9" cy="16.3" r="0.95"/>
+    <circle class="eye" cx="11.5" cy="15.9" r="0.95"/>
+    <path class="eye" d="M4.3 21.3 q4.5 2.5 9 0 q-4.5 0.9 -9 0 z"/>
+  </g>
+
+  <!-- right toad, mirrored -->
+  <g transform="rotate(-4 23 25)">
+    <path class="toad" d="M16.6 25 q0 -8.2 6.4 -8.2 q6.4 0 6.4 8.2 z"/>
+    <circle class="toad" cx="20.5" cy="16.2" r="2.5"/>
+    <circle class="toad" cx="26.1" cy="16.6" r="2.5"/>
+    <circle class="eye" cx="20.5" cy="15.9" r="0.95"/>
+    <circle class="eye" cx="26.1" cy="16.3" r="0.95"/>
+    <path class="eye" d="M18.7 21.3 q4.5 2.5 9 0 q-4.5 0.9 -9 0 z"/>
+  </g>
+
+  <!-- the stone, held between them -->
+  <path class="stone" d="M16 4.6 l3.1 3.6 l-3.1 3.6 l-3.1 -3.6 z"/>
+</svg>

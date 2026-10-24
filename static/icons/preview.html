@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toadstone icon set</title>
+<style>
+  :root {
+    --bg-sunken:#f2f2f0; --bg-base:#fbfbfa; --bg-surface:#ffffff;
+    --border-subtle:#ebebe8; --border:#dcdcd7;
+    --text-primary:#16181d; --text-secondary:#5c6270; --text-tertiary:#878d9b;
+    --accent:#4f46e5; --ok:#047857; --warn:#b45309; --danger:#c2231f; --info:#1d4ed8;
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;
+  }
+  [data-theme="dark"], .panel-dark {
+    --bg-sunken:#08090b; --bg-base:#0b0c0f; --bg-surface:#111318;
+    --border-subtle:#1b1f27; --border:#272c37;
+    --text-primary:#e8eaf0; --text-secondary:#9aa3b2; --text-tertiary:#6b7484;
+    --accent:#6366f1; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --info:#60a5fa;
+  }
+  .panel-light {
+    --bg-sunken:#f2f2f0; --bg-base:#fbfbfa; --bg-surface:#ffffff;
+    --border-subtle:#ebebe8; --border:#dcdcd7;
+    --text-primary:#16181d; --text-secondary:#5c6270; --text-tertiary:#878d9b;
+    --accent:#4f46e5; --ok:#047857; --warn:#b45309; --danger:#c2231f; --info:#1d4ed8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; padding:24px 16px 64px; font-family:var(--font-sans);
+    background:var(--bg-sunken); color:var(--text-primary); font-size:13px; line-height:18px;
+  }
+  header { max-width:1400px; margin:0 auto 20px; display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; }
+  h1 { font-size:20px; line-height:26px; margin:0; font-weight:600; letter-spacing:-0.01em; }
+  .meta { font-family:var(--font-mono); font-size:11px; color:var(--text-tertiary); }
+  .themes { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:16px; }
+  .panel { background:var(--bg-base); color:var(--text-primary); border:1px solid var(--border); border-radius:8px; padding:16px; }
+  .panel h2 { font-size:10px; line-height:14px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-tertiary); margin:0 0 12px; font-weight:600; }
+  .group-title { font-size:10px; line-height:14px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-tertiary); font-weight:600; margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--border-subtle); }
+  .group-title:first-of-type { margin-top:0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:4px; }
+  .cell { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 4px 8px;
+    border:1px solid transparent; border-radius:6px; }
+  .cell:hover { background:var(--bg-surface); border-color:var(--border-subtle); }
+  .sizes { display:flex; align-items:flex-end; gap:8px; height:26px; color:var(--text-primary); }
+  .cell code { font-family:var(--font-mono); font-size:10px; line-height:13px; color:var(--text-secondary);
+    text-align:center; word-break:break-word; }
+  .strip { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:10px 12px; margin-bottom:12px;
+    background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:6px; font-size:12px; }
+  .strip span { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; }
+  .sev-danger { color:var(--danger); } .sev-warn { color:var(--warn); }
+  .sev-info { color:var(--info); } .sev-ok { color:var(--ok); } .sev-accent { color:var(--accent); }
+  .row16 { display:flex; flex-wrap:wrap; gap:0; margin-bottom:12px; padding:6px 8px;
+    background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:6px; }
+  .row16 .icon { margin:3px 5px; }
+  .icon { display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Toadstone icon set</h1>
+  <span class="meta" id="stats"></span>
+</header>
+
+<div class="themes">
+  <section class="panel panel-light" data-panel="light">
+    <h2>Light theme</h2>
+    <div class="body"></div>
+  </section>
+  <section class="panel panel-dark" data-panel="dark">
+    <h2>Dark theme</h2>
+    <div class="body"></div>
+  </section>
+</div>
+
+<script src="/static/js/icons.js"></script>
+<script>
+  const GROUPS = [
+    ['Crawl controls', ['play', 'stop', 'pause', 'refresh', 'loader']],
+    ['Data in / out', ['download', 'upload', 'save', 'folder', 'copy', 'share', 'trash']],
+    ['Chrome & navigation', ['settings', 'sliders', 'dashboard', 'menu', 'more-horizontal', 'search', 'filter', 'plus', 'minus', 'x', 'log-out', 'user']],
+    ['Chevrons & arrows', ['chevron-up', 'chevron-down', 'chevron-left', 'chevron-right', 'chevrons-up-down', 'arrow-up', 'arrow-down', 'arrow-left', 'arrow-right', 'arrow-up-right', 'sort-asc', 'sort-desc']],
+    ['Status', ['check', 'check-circle', 'x-circle', 'alert-triangle', 'alert-circle', 'info', 'help-circle', 'circle', 'shield', 'bug', 'zap', 'key', 'lock']],
+    ['Pages, links & structure', ['link', 'link-broken', 'external-link', 'globe', 'file-text', 'code', 'image', 'sitemap', 'git-branch', 'git-compare', 'list-checks', 'tag', 'bookmark']],
+    ['Infrastructure & data', ['server', 'database', 'table', 'columns', 'rows', 'rows-compact', 'monitor', 'bot', 'eye', 'eye-off']],
+    ['Measurement', ['clock', 'calendar', 'gauge', 'trending-up', 'bar-chart', 'pie-chart']],
+    ['Theme', ['sun', 'moon']]
+  ];
+
+  const listed = new Set(GROUPS.flatMap(g => g[1]));
+  const missed = window.LibreIcons.names.filter(name => !listed.has(name));
+  if (missed.length) GROUPS.push(['Ungrouped', missed]);
+
+  document.getElementById('stats').textContent =
+    window.LibreIcons.names.length + ' icons · ' + window.LibreIcons.aliases.length +
+    ' aliases · v' + window.LibreIcons.VERSION;
+
+  const severityStrip = `
+    <div class="strip">
+      <span class="sev-danger">${icon('alert-circle', { size: 14 })} --danger</span>
+      <span class="sev-warn">${icon('alert-triangle', { size: 14 })} --warn</span>
+      <span class="sev-info">${icon('info', { size: 14 })} --info</span>
+      <span class="sev-ok">${icon('check-circle', { size: 14 })} --ok</span>
+      <span class="sev-accent">${icon('loader', { size: 14 })} --accent (spinning)</span>
+      <span>${icon('no-such-icon', { size: 14 })} missing name &rarr; placeholder</span>
+    </div>`;
+
+  const row16 = '<div class="row16">' +
+    window.LibreIcons.names.map(name => icon(name, { size: 16 })).join('') +
+    '</div>';
+
+  const body = severityStrip + row16 + GROUPS.map(([title, names]) => `
+    <div class="group-title">${title} &middot; ${names.length}</div>
+    <div class="grid">
+      ${names.map(name => `
+        <div class="cell">
+          <div class="sizes">
+            ${icon(name, { size: 16 })}${icon(name, { size: 20 })}${icon(name, { size: 24 })}
+          </div>
+          <code>${name}</code>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.querySelectorAll('.panel .body').forEach(el => { el.innerHTML = body; });
+</script>
+</body>
+</html>
