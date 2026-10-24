@@ -10,6 +10,7 @@ from src.core.duplication import (
     DUPLICATION_TIME_BUDGET_SECONDS,
     DuplicationDetector,
 )
+from src.core import http_status
 from src.utils.issue_factory import make_issue
 from src.utils.url_params import (
     DEFAULT_TRACKING_PARAMS,
@@ -19,7 +20,7 @@ from src.utils.url_params import (
 
 # Re-exported so importers of this module keep seeing the duplication budget
 # where it has always lived; the pass itself now lives in src/core/duplication.
-__all__ = ['IssueDetector', 'has_alt_attribute',
+__all__ = ['IssueDetector', 'has_alt_attribute', 'is_tracking_pixel',
            'DUPLICATION_TIME_BUDGET_SECONDS', 'DUPLICATION_EXAMPLES_PER_PAGE']
 
 # Site-wide "internal links carry tracking parameters" report.
@@ -86,6 +87,28 @@ def as_standard_issue(issue):
     for key, value in issue.items():          # keep anything extra a check added
         standard.setdefault(key, value)
     return standard
+
+
+def is_tracking_pixel(image):
+    """True when an img is a counter, not content.
+
+    A 1x1 image is a tracking beacon or a spacer GIF. It carries no meaning to
+    anybody, sighted or not, and a screen reader that meets one has nothing to
+    announce - so demanding alt text on it produces noise and nothing else.
+    Crawling ten real SEO sites, every one of them tripped this.
+
+    Judged on the declared width and height only. An image that declares no
+    size is not assumed to be a pixel: guessing would hide real missing alt
+    text, which is the failure that actually matters.
+    """
+    def side(value):
+        try:
+            return int(str(value).strip().rstrip('px') or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    width, height = side(image.get('width')), side(image.get('height'))
+    return 0 < width <= 2 and 0 < height <= 2
 
 
 def has_alt_attribute(image):
@@ -383,7 +406,8 @@ class IssueDetector:
 
         # Image alt text. Only a missing attribute is a defect;
         # alt="" marks a decorative image and is correct.
-        images = result.get('images', [])
+        images = [img for img in result.get('images', [])
+                  if not is_tracking_pixel(img)]
         missing = [img for img in images if not has_alt_attribute(img)]
         decorative = [img for img in images
                       if has_alt_attribute(img) and not (img.get('alt') or '').strip()]
@@ -524,6 +548,20 @@ class IssueDetector:
                     'issue': f'Broken Image ({status})',
                     'details': f'Image returned {status}: {img_url}'
                 })
+
+        # Images the CDN refused *this crawler*. Reported, because silently
+        # dropping them would hide a real misconfiguration; at info, because
+        # the usual cause is a bot wall and the image loads fine in a browser.
+        for img in result.get('blocked_images', []) or []:
+            status = img.get('status', 0)
+            issues.append({
+                'url': url,
+                'type': 'info',
+                'category': 'Content',
+                'issue': 'Image Refused the Crawler',
+                'details': f'Image {http_status.describe_blocked(status)}, so it '
+                           f'could not be verified: {img.get("url", "")}'
+            })
 
     def detect_duplication_issues(self, all_results, similarity_threshold=None):
         """Flag pages whose main text is identical or near-identical to another

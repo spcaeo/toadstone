@@ -702,7 +702,44 @@ def test_junk_input_does_not_raise():
         result('junk: odd pages do not raise', False, f'{type(exc).__name__}: {exc}')
 
 
+def test_srcset_urls_may_contain_commas():
+    """A URL with commas in it is still one URL.
+
+    Splitting a srcset on commas invents broken images. Cloudflare's resizer
+    writes /cdn-cgi/image/width=800,quality=85,format=auto/hero.png, and the
+    old parser turned that single URL into three fragments - two of which are
+    not URLs - so the crawler reported a broken image on a page whose images
+    were fine. Found by crawling ten real SEO sites.
+    """
+    from src.core.header_checks import _srcset_urls
+
+    cf = ('https://example.com/cdn-cgi/image/width=800,quality=85,format=auto/hero.png 800w, '
+          'https://example.com/cdn-cgi/image/width=1600,quality=85,format=auto/hero.png 1600w')
+    got = _srcset_urls(cf)
+    result('srcset: a Cloudflare resizer URL survives as one URL',
+           got == ['https://example.com/cdn-cgi/image/width=800,quality=85,format=auto/hero.png',
+                   'https://example.com/cdn-cgi/image/width=1600,quality=85,format=auto/hero.png'],
+           str(got))
+    result('srcset: no fragment is mistaken for a URL',
+           not any(u.startswith(('quality=', 'format=')) for u in got), str(got))
+
+    result('srcset: ordinary candidates still split',
+           _srcset_urls('a.png 1x, b.png 2x') == ['a.png', 'b.png'])
+    result('srcset: a comma with no space after it still separates',
+           _srcset_urls('a.png 1x,b.png 2x') == ['a.png', 'b.png'])
+    result('srcset: candidates without descriptors still split',
+           _srcset_urls('a.png, b.png') == ['a.png', 'b.png'])
+    result('srcset: a query string with commas survives',
+           _srcset_urls('/img?w=100,h=50 100w') == ['/img?w=100,h=50'],
+           str(_srcset_urls('/img?w=100,h=50 100w')))
+    result('srcset: a data URI is skipped without taking the rest with it',
+           _srcset_urls('data:image/gif;base64,R0lGODlhAQ== 1x, real.png 2x') == ['real.png'],
+           str(_srcset_urls('data:image/gif;base64,R0lGODlhAQ== 1x, real.png 2x')))
+    result('srcset: empty is empty', _srcset_urls('') == [] and _srcset_urls(None) == [])
+
+
 TESTS = (
+    test_srcset_urls_may_contain_commas,
     test_a_correctly_served_site_reports_nothing,
     test_pages_with_no_recorded_headers_are_not_judged,
     test_error_pages_and_non_html_are_not_judged,

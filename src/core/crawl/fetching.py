@@ -11,6 +11,7 @@ Lifted out of crawler.py unchanged to bring that file under the project's
 1,000-line limit.
 """
 
+from src.core import http_status
 from src.core.microdata import extract as _other_structured_data
 import asyncio
 import socket
@@ -262,13 +263,22 @@ class FetchingMixin:
                     if image_links:
                         self._check_image_statuses(image_links, depth + 1)
                         self._apply_image_sizes(result)
+                        # 401/403/429 mean the CDN refused *this crawler*, not
+                        # that the image is missing - see src/core/http_status.py
                         broken = [l for l in image_links
-                                  if l.get('target_status') is not None
-                                  and (l['target_status'] >= 400 or l['target_status'] == 0)]
+                                  if http_status.is_broken(l.get('target_status'))
+                                  or http_status.is_no_response(l.get('target_status'))]
+                        blocked = [l for l in image_links
+                                   if http_status.is_blocked(l.get('target_status'))]
                         if broken:
                             result['broken_images'] = [
                                 {'url': l['target_url'], 'status': l['target_status']}
                                 for l in broken
+                            ]
+                        if blocked:
+                            result['blocked_images'] = [
+                                {'url': l['target_url'], 'status': l['target_status']}
+                                for l in blocked
                             ]
 
                     # (link events were journalled by the link manager)
@@ -485,13 +495,21 @@ class FetchingMixin:
                 if image_links:
                     self._check_image_statuses(image_links, depth + 1)
                     self._apply_image_sizes(result)
+                    # Same rule as the HTTP path: refused is not missing.
                     broken = [l for l in image_links
-                              if l.get('target_status') is not None
-                              and (l['target_status'] >= 400 or l['target_status'] == 0)]
+                              if http_status.is_broken(l.get('target_status'))
+                              or http_status.is_no_response(l.get('target_status'))]
+                    blocked = [l for l in image_links
+                               if http_status.is_blocked(l.get('target_status'))]
                     if broken:
                         result['broken_images'] = [
                             {'url': l['target_url'], 'status': l['target_status']}
                             for l in broken
+                        ]
+                    if blocked:
+                        result['blocked_images'] = [
+                            {'url': l['target_url'], 'status': l['target_status']}
+                            for l in blocked
                         ]
 
                 # (link events were journalled by the link manager)

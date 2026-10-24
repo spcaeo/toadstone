@@ -45,6 +45,18 @@ parser.add_argument('--fail-on', choices=['error', 'warning', 'info'], default=N
                     help='With --crawl: exit non-zero when an issue of this severity or worse is open')
 parser.add_argument('--report', metavar='FILE',
                     help='With --crawl: write the issues to FILE as JSON')
+parser.add_argument('--max-urls', type=int, default=None, metavar='N',
+                    help='With --crawl: stop after N URLs. Without it the '
+                         'configured limit applies, which is effectively '
+                         'unbounded - a poor default to point at a site that '
+                         'is not yours.')
+parser.add_argument('--delay', type=float, default=None, metavar='SECONDS',
+                    help='With --crawl: wait at least this long between '
+                         'requests. Honoured by page fetches, image checks and '
+                         'sitemap discovery alike.')
+parser.add_argument('--user-agent', default=None, metavar='STRING',
+                    help='With --crawl: the User-Agent to send. Say who you '
+                         'are and leave a way to be contacted.')
 parser.add_argument('--port', '-p', type=int, default=None,
                     help='Port to serve on (default 5000, or the PORT environment '
                          'variable). macOS AirPlay Receiver owns 5000 by default, '
@@ -856,12 +868,17 @@ def main():
     print("Using Waitress WSGI server with multi-threading support")
     serve(app, host='0.0.0.0', port=PORT, threads=8)
 
-def run_cli_crawl(url, fail_on=None, report_path=None):
+def run_cli_crawl(url, fail_on=None, report_path=None,
+                  max_urls=None, delay=None, user_agent=None):
     """Crawl once, print a summary and exit non-zero when it fails the gate.
 
     This is the CI entry point: `python main.py --crawl https://site --fail-on error`
     returns 1 when the crawl finds an open issue at that severity or worse, so a
     pipeline can block a deploy on it.
+
+    The bounds are arguments rather than settings because this is the entry
+    point people point at somebody else's site, and the stored default is
+    effectively unlimited.
     """
     from src.crawler import WebCrawler
 
@@ -870,6 +887,31 @@ def run_cli_crawl(url, fail_on=None, report_path=None):
         crawler.update_config(SettingsManager().get_crawler_config())
     except Exception as e:
         print(f"Using default settings ({e})")
+
+    # The crawler's own config is snake_case; the settings file is camelCase.
+    # Getting this wrong fails silently - the flag is accepted, ignored, and
+    # the crawl runs unbounded anyway - so it is asserted below.
+    overrides = {}
+    if max_urls is not None:
+        overrides['max_urls'] = max_urls
+    if delay is not None:
+        overrides['delay'] = delay
+    if user_agent is not None:
+        overrides['user_agent'] = user_agent
+    if overrides:
+        crawler.update_config(overrides)
+        applied = {k: crawler.config.get(k) for k in overrides}
+        if applied != overrides:
+            print(f'WARNING: a bound did not take effect: asked {overrides}, '
+                  f'got {applied}')
+        print('Crawl bounds: ' + ', '.join(f'{k}={v}' for k, v in applied.items()))
+
+    if max_urls is None:
+        # The stored default is effectively unlimited. Nobody should discover
+        # that by watching a crawl of somebody else's site not stop.
+        print(f'No --max-urls given; the configured limit is '
+              f'{crawler.config.get("max_urls"):,} URLs at '
+              f'{crawler.config.get("delay")}s between requests.')
 
     ok, message = crawler.start_crawl(url)
     if not ok:
@@ -912,5 +954,8 @@ def run_cli_crawl(url, fail_on=None, report_path=None):
 
 if __name__ == '__main__':
     if args.crawl:
-        sys.exit(run_cli_crawl(args.crawl, args.fail_on, args.report))
+        sys.exit(run_cli_crawl(args.crawl, args.fail_on, args.report,
+                             max_urls=args.max_urls,
+                             delay=args.delay,
+                             user_agent=args.user_agent))
     main()

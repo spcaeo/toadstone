@@ -140,7 +140,9 @@ class LifecycleMixin:
         self.rate_limiter = RateLimiter(requests_per_second)
         self.link_manager = LinkManager(self.base_domain, event_log=self.event_log,
                                         strip_params=self._get_strip_params())
-        self.sitemap_parser = SitemapParser(self.session, self.base_domain, self.config['timeout'])
+        self.sitemap_parser = SitemapParser(self.session, self.base_domain,
+                                            self.config['timeout'],
+                                            rate_limiter=self.rate_limiter)
         self.issue_detector = IssueDetector(self.config.get('issue_exclusion_patterns', []),
                                             tracking_params=self.config.get('strip_query_params'))
 

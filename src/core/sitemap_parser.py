@@ -7,10 +7,19 @@ from urllib.parse import urlparse
 class SitemapParser:
     """Discovers and parses sitemap.xml files"""
 
-    def __init__(self, session, base_domain, timeout=10):
+    def __init__(self, session, base_domain, timeout=10, rate_limiter=None):
         self.session = session
         self.base_domain = base_domain
         self.timeout = timeout
+        # Sitemap discovery tries four well-known paths plus every sitemap
+        # robots.txt names, and an index can fan out to dozens of children.
+        # None of it used to wait for the delay the crawl was configured with,
+        # so a polite crawl opened with a burst of unthrottled requests.
+        self.rate_limiter = rate_limiter
+
+    def _wait(self):
+        if self.rate_limiter:
+            self.rate_limiter.acquire()
 
     def discover_sitemaps(self, base_url):
         """
@@ -51,6 +60,7 @@ class SitemapParser:
         sitemaps = []
         try:
             robots_url = f"{base_domain}/robots.txt"
+            self._wait()
             response = self.session.get(robots_url, timeout=self.timeout)
 
             if response.status_code == 200:
@@ -77,6 +87,7 @@ class SitemapParser:
 
         try:
             print(f"Parsing sitemap: {sitemap_url}")
+            self._wait()
             response = self.session.get(sitemap_url, timeout=self.timeout)
 
             if response.status_code != 200:

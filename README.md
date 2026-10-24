@@ -903,7 +903,7 @@ Honest about what is not here yet.
 | **[docs/demo/video-script.md](docs/demo/video-script.md)** | The demo video, scene by scene, with the rule that no claim appears in it the repository cannot back |
 | **[docs/demo/launch-post.md](docs/demo/launch-post.md)** | The launch narrative — long, short and one-line — plus the claims we deliberately do not make |
 | **[docs/about-the-name.md](docs/about-the-name.md)** | Why a fake medieval gem is the right name for a crawler, and the audit that earned it |
-| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 159 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
+| **[BUILD-LOG.md](BUILD-LOG.md)** | The day-by-day engineering record. 167 entries, first person, including every wrong turn. `tools/verify_build_log.py` fails CI if an entry ever goes missing from it |
 | **[CHANGELOG.md](CHANGELOG.md)** | What changed and when, with the known problems listed rather than omitted |
 | **[FORK.md](FORK.md)** | Exactly what this fork adds on top of LibreCrawl |
 | **[SECURITY.md](SECURITY.md)** · **[CONTRIBUTING.md](CONTRIBUTING.md)** · **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** | How to report a vulnerability, how to get a change merged, and how to behave |

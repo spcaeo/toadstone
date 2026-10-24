@@ -739,17 +739,55 @@ def _rel_values(tag):
 
 
 def _srcset_urls(value):
-    """The candidate URLs in a srcset, ignoring the width/density descriptors."""
+    """The candidate URLs in a srcset, ignoring the width/density descriptors.
+
+    Splitting on commas is wrong, and wrong in a way that invents broken
+    images. A URL may contain commas - Cloudflare's image resizer builds them
+    that way:
+
+        /cdn-cgi/image/width=800,quality=85,format=auto/hero.png 800w
+
+    Naive splitting turns that one URL into three fragments, two of which are
+    not URLs at all, and the crawler then reports a broken image on a page
+    whose images are fine. Seen on a real site while crawling ten of them.
+
+    So this follows the HTML standard instead: a candidate's URL is a run of
+    characters that are not ASCII whitespace, and it is the *whitespace* that
+    ends it - not a comma. A comma only separates candidates once the URL and
+    its descriptor are done. Commas trailing a URL belong to the separator and
+    are stripped.
+    """
     value = (value or '').strip()
-    # A data: URI may itself contain commas, which would split into nonsense.
-    # Nothing insecure can hide in one, so skipping the whole attribute is safe.
-    if not value or 'data:' in value.lower():
+    if not value:
         return []
+
     urls = []
-    for candidate in value.split(','):
-        tokens = candidate.split()
-        if tokens:
-            urls.append(tokens[0])
+    i, n = 0, len(value)
+    while i < n:
+        # 1. skip whitespace and the commas that separate candidates
+        while i < n and (value[i].isspace() or value[i] == ','):
+            i += 1
+        if i >= n:
+            break
+
+        # 2. the URL runs to the next whitespace. Commas inside it are part
+        #    of the URL, which is the whole point of this function.
+        start = i
+        while i < n and not value[i].isspace():
+            i += 1
+        url = value[start:i]
+
+        # 3. a URL ending in commas has no descriptor; those commas are the
+        #    separator ("a.png,b.png 2x" is two candidates)
+        if url.endswith(','):
+            url = url.rstrip(',')
+        else:
+            # 4. otherwise skip its descriptor, which ends at the next comma
+            while i < n and value[i] != ',':
+                i += 1
+
+        if url and not url.lower().startswith('data:'):
+            urls.append(url)
     return urls
 
 

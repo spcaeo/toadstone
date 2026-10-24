@@ -4,7 +4,7 @@ No test framework, no runner, no extra dependencies. Every suite is a plain
 script that prints PASS or FAIL per behaviour and exits non-zero if anything
 failed.
 
-**34 suites.** Two of them drive a real browser against a running
+**35 suites.** Two of them drive a real browser against a running
 app; the rest need nothing but this repository.
 
 ```bash
@@ -48,6 +48,7 @@ python tools/coverage_sweep.py        # 180 distinct checks fired, last run
 | `detector_tests.py` | The issue detector: every fetch error has a label, enforced by reading the source |
 | `duplicate_tests.py` | Duplicate detection on main text, aliases, shared passages |
 | `export_tests.py` | Exports: twelve datasets, three formats, and the field selection |
+| `false_positive_tests.py` | The false positives found by crawling ten real SEO sites: bot walls read as broken links, commas in URLs, tracking pixels, an unreadable robots.txt |
 | `fixture_tests.py` | The crawler end to end against local fixture sites |
 | `google_connect_tests.py` | Connecting a Google account: signed state, token exchange, the encrypted store |
 | `google_tests.py` | Search Console and GA4 parsers, driven from Google's own Discovery documents |

@@ -30,6 +30,8 @@ an empty offending value so its id stays stable as the list shrinks.
 
 import re
 from collections import defaultdict
+
+from src.core import http_status
 from urllib.parse import urlsplit, urlunsplit
 
 from src.core import locales, schema_checks
@@ -341,30 +343,51 @@ def _redirect_checks(pages, links, by_url, cfg, emit):
 
 
 def _broken_target_checks(links, cfg, emit):
-    """Which page links to each broken URL - the fix is on the source page."""
+    """Which page links to each broken URL - the fix is on the source page.
+
+    A 403 is not a broken link. Crawling ten well-known SEO sites reported
+    "301 pages link to broken URLs" on one of them, and every one of those URLs
+    loaded fine in a browser: they sat behind a bot wall. Those are now their
+    own finding, at info, described as what they are.
+    """
     broken = defaultdict(list)
+    blocked = defaultdict(list)
     for link in links:
         status = link.get('target_status')
-        if not isinstance(status, int) or status < 400:
+        if not isinstance(status, int):
             continue
         source = link.get('source_url') or ''
-        if source:
+        if not source:
+            continue
+        if http_status.is_broken(status):
             broken[source].append((link.get('target_url') or '', status))
+        elif http_status.is_blocked(status):
+            blocked[source].append((link.get('target_url') or '', status))
 
-    items = []
-    for source, targets in sorted(broken.items()):
-        unique = sorted(set(targets))
-        listed = '; '.join(f'{url} ({status})' for url, status in unique[:3])
-        items.append(_item(
-            source, ' '.join(url for url, _ in unique),
-            f'{len(unique)} link(s) on this page are broken: {listed}'
-            + (f' (+{len(unique) - 3} more)' if len(unique) > 3 else ''),
-            {'found': f'{len(unique)} broken links',
-             'related_urls': [url for url, _ in unique][:10]}))
+    def group(bucket, phrase):
+        items = []
+        for source, targets in sorted(bucket.items()):
+            unique = sorted(set(targets))
+            listed = '; '.join(f'{url} ({status})' for url, status in unique[:3])
+            items.append(_item(
+                source, ' '.join(url for url, _ in unique),
+                f'{len(unique)} link(s) on this page {phrase}: {listed}'
+                + (f' (+{len(unique) - 3} more)' if len(unique) > 3 else ''),
+                {'found': f'{len(unique)} {phrase}',
+                 'related_urls': [url for url, _ in unique][:10]}))
+        return items
 
-    emit('links_to_broken_urls', 'error', 'Page Links to Broken URLs', items,
-         '{count} pages link to URLs that return an error.',
+    emit('links_to_broken_urls', 'error', 'Page Links to Broken URLs',
+         group(broken, 'are broken'),
+         '{count} pages link to URLs that are gone or erroring.',
          'Update or remove the link; a visitor following it hits an error.')
+
+    emit('links_to_blocked_urls', 'info', 'Page Links to URLs That Refused the Crawler',
+         group(blocked, 'refused this crawler'),
+         '{count} pages link to URLs behind a bot wall or a login.',
+         'Usually nothing to fix: these are 401/403/429 responses to an '
+         'automated client, and the page may well load fine in a browser. '
+         'Worth a look only if the URL should be public.')
 
 
 # ---------------------------------------------------------------------------

@@ -41,7 +41,7 @@ that prints `PASS` / `FAIL` per behaviour and exits non-zero if anything failed.
    `tests/google_connect_tests.py` (1,041) and `src/core/rendered_checks.py`
    (1,001). Making one of them smaller is a welcome pull request; making one of
    them bigger needs an argument.
-5. **The full suite passes.** 34 suites, 1,865 assertions:
+5. **The full suite passes.** 35 suites, 1,907 assertions:
 
    ```bash
    failed=""

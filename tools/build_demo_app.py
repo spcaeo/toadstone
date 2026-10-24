@@ -170,6 +170,114 @@ def relativise_asset_paths(static_root):
     return changed
 
 
+SITE = 'https://spcaeo.github.io/toadstone/'
+
+# The published demo is a page on the public web, and the first version of it
+# shipped with no canonical, no OpenGraph, no Twitter card and no structured
+# data - from an SEO tool. Fixed here rather than in the app's template,
+# because these values are true of the published copy and of nothing else.
+HEAD_TAGS = f"""
+<link rel="canonical" href="{SITE}">
+<meta name="description" content="A live Toadstone demo: the real interface, frozen over a real crawl of 141 pages. Self-hosted SEO crawler with JavaScript rendering, crawl diffing, axe-core accessibility, server log analysis and an MCP server. No sign-up.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Toadstone">
+<meta property="og:title" content="Toadstone — live demo, the real interface">
+<meta property="og:description" content="A real crawl of 141 pages, in the actual app. Click the tabs, open a finding. No sign-up.">
+<meta property="og:url" content="{SITE}">
+<meta property="og:image" content="https://raw.githubusercontent.com/spcaeo/toadstone/main/assets/brand/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Toadstone — live demo, the real interface">
+<meta name="twitter:description" content="A real crawl of 141 pages, in the actual app. No sign-up.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/spcaeo/toadstone/main/assets/brand/social-preview.png">
+<script type="application/ld+json">{{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Toadstone",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "SEO crawler",
+  "operatingSystem": "Docker, macOS, Linux, Windows",
+  "url": "https://github.com/spcaeo/toadstone",
+  "downloadUrl": "https://github.com/spcaeo/toadstone",
+  "description": "A self-hosted SEO crawler whose checks have been watched to fire: 222 checks, 180 proven against a site built to be wrong. JavaScript rendering, crawl-to-crawl diffing with stable issue ids, axe-core accessibility, server log analysis and an MCP server.",
+  "license": "https://www.elastic.co/licensing/elastic-license",
+  "offers": {{"@type": "Offer", "price": "0", "priceCurrency": "USD"}},
+  "author": {{"@type": "Organization", "name": "LabsMedia", "url": "https://www.labsmedia.com/"}}
+}}</script>
+"""
+
+ROBOTS = f"""User-agent: *
+Allow: /
+
+Sitemap: {SITE}sitemap.xml
+"""
+
+
+def sitemap(today):
+    pages = [(SITE, '1.0'), (SITE + 'watch.html', '0.8')]
+    urls = '\n'.join(
+        f'  <url><loc>{loc}</loc><lastmod>{today}</lastmod>'
+        f'<priority>{pri}</priority></url>' for loc, pri in pages)
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f'{urls}\n</urlset>\n')
+
+
+
+WATCH_PAGE = f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toadstone — the tour</title>
+<meta name="description" content="Why a self-hosted SEO crawler exists when a per-machine licence does not fit a team of 22, and what it found: 84 of 225 checks had ever fired.">
+<link rel="canonical" href="{SITE}watch.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="video.other">
+<meta property="og:site_name" content="Toadstone">
+<meta property="og:title" content="Toadstone — the tour">
+<meta property="og:description" content="Why it exists, what it found, and every view in the app.">
+<meta property="og:url" content="{SITE}watch.html">
+<meta property="og:image" content="{SITE}poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Toadstone — the tour">
+<meta name="twitter:description" content="Why it exists, what it found, and every view in the app.">
+<meta name="twitter:image" content="{SITE}poster.jpg">
+<link rel="icon" href="static/favicon.svg">
+<style>
+:root{{color-scheme:dark}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0d0f14;color:#e8eaef;font:16px/1.6 ui-sans-serif,system-ui,sans-serif;
+     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px}}
+.w{{max-width:1100px;width:100%}}
+h1{{font-size:30px;letter-spacing:-.02em;margin-bottom:6px}}
+p.s{{color:#9aa0ad;margin-bottom:22px}}
+video{{width:100%;max-height:72vh;object-fit:contain;border-radius:14px;
+       border:1px solid #262a33;background:#000;display:block}}
+.cta{{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}}
+a.b{{border:1px solid #262a33;background:#14161c;color:#e8eaef;text-decoration:none;
+    padding:11px 18px;border-radius:9px;font-size:14px}}
+a.b.p{{background:#4f46e5;border-color:#4f46e5;color:#fff}}
+small{{display:block;margin-top:24px;color:#6f7584;line-height:1.7}}
+a{{color:#a5b0ff}}
+</style></head><body><div class="w">
+<h1>Toadstone — the tour</h1>
+<p class="s">Why it exists, what it found, and every view in the app. Nothing staged.<br>
+Looking for the software itself? <a href="./">Open the live demo</a> — that one you can click.</p>
+<video src="launch.mp4" controls playsinline preload="metadata" poster="poster.jpg"></video>
+<div class="cta">
+  <a class="b p" href="./">Open the live demo</a>
+  <a class="b" href="https://github.com/spcaeo/toadstone">Source on GitHub</a>
+  <a class="b" href="launch.mp4" download>Download the video</a>
+</div>
+<small>A self-hosted SEO crawler, source-available under the Elastic License 2.0.
+Built by <a href="https://www.labsmedia.com/">LabsMedia</a>. Other products named in
+this project's documentation are trademarks of their respective owners; Toadstone is
+not affiliated with or endorsed by any of them.</small>
+</div></body></html>
+"""
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--app', default='http://127.0.0.1:5058')
@@ -242,6 +350,19 @@ def main():
     # the page itself, rewritten to load those assets from here
     html = html.replace('href="/static/', 'href="static/').replace('src="/static/', 'src="static/')
     html = re.sub(r'<script[^>]*src="https://[^"]*"[^>]*></script>', '', html)
+    # Our own head tags go in before the shim, and the app's own <title> is
+    # replaced: "Toadstone - SEO Spider" is right in the app and wrong as the
+    # title of a public demo page.
+    html = re.sub(r'<title>.*?</title>',
+                  '<title>Toadstone live demo — a real crawl, in the real interface</title>',
+                  html, count=1, flags=re.S)
+    # The app template carries its own description now (4dc3dd6). Two
+    # description tags on one page is itself a defect - and one this tool
+    # reports - so the template's is replaced rather than joined.
+    html = re.sub(r'<meta[^>]*name=["\']description["\'][^>]*>', '', html,
+                  flags=re.I)
+    html = html.replace('</head>', HEAD_TAGS + '</head>', 1)
+
     data = f'<script>window.__DEMO_RESPONSES__ = {json.dumps(captured, separators=(",", ":"))};</script>'
     shim = SHIM.replace('__CRAWL__', str(args.crawl))
     html = html.replace('</head>', data + shim + '</head>', 1)
@@ -250,6 +371,26 @@ def main():
         fh.write(html)
     with open(os.path.join(OUT, '.nojekyll'), 'w') as fh:
         fh.write('')
+
+    # The tour page and its assets belong to the published site too, and this
+    # function empties the directory - so it owns all of it or the next build
+    # silently drops them, which is what happened the first time.
+    with open(os.path.join(OUT, 'watch.html'), 'w') as fh:
+        fh.write(WATCH_PAGE)
+    for src, dest in (('assets/video/launch.mp4', 'launch.mp4'),
+                      ('assets/brand/video-poster.jpg', 'poster.jpg')):
+        source = os.path.join(REPO, src)
+        if os.path.exists(source):
+            shutil.copy2(source, os.path.join(OUT, dest))
+        else:
+            print(f'  WARNING: {src} is missing, so the tour page will not play')
+
+    import datetime
+    today = datetime.date.today().isoformat()
+    with open(os.path.join(OUT, 'robots.txt'), 'w') as fh:
+        fh.write(ROBOTS)
+    with open(os.path.join(OUT, 'sitemap.xml'), 'w') as fh:
+        fh.write(sitemap(today))
 
     total = sum(os.path.getsize(os.path.join(dp, f))
                 for dp, _, fs in os.walk(OUT) for f in fs)

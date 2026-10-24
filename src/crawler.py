@@ -773,6 +773,12 @@ class WebCrawler(LifecycleMixin, FetchingMixin, AnalysisPassesMixin,
             content_type = ''
             size = 0
             try:
+                # Image checks used to bypass the rate limiter entirely, so a
+                # 300-page crawl of an image-heavy site made about 3,000
+                # unthrottled requests while claiming to honour a delay. A
+                # politeness setting that only some requests obey is not one.
+                if self.rate_limiter:
+                    self.rate_limiter.acquire()
                 resp = self.session.head(url, timeout=5, allow_redirects=True)
                 link['target_status'] = resp.status_code
                 content_type = resp.headers.get('content-type', '').split(';')[0]
@@ -942,14 +948,36 @@ class WebCrawler(LifecycleMixin, FetchingMixin, AnalysisPassesMixin,
                     # default UA — many servers return 403 for that, causing
                     # RobotFileParser to set disallow_all=True and block everything.
                     response = self.session.get(robots_url, timeout=10)
-                    if response.status_code in (401, 403):
-                        rp.disallow_all = True
-                    elif response.status_code >= 400:
+                    status = response.status_code
+
+                    # RFC 9309 section 2.3.1: a 4xx means robots.txt is
+                    # *unavailable*, and an unavailable robots.txt allows
+                    # everything. This had it backwards for 401/403, so one
+                    # Cloudflare bot challenge on /robots.txt disallowed an
+                    # entire site: the crawl returned almost nothing and then
+                    # reported canonicals as "blocked by robots.txt" that
+                    # nobody had blocked. Found crawling ten real sites.
+                    if 400 <= status <= 499:
                         rp.allow_all = True
+                        self._note_robots_unreadable(robots_url, f'returned {status}')
+                    elif status >= 500:
+                        # "Unreachable" in the same section: the file may exist
+                        # and we cannot see it, so stay out until it answers.
+                        rp.disallow_all = True
+                        self._note_robots_unreadable(
+                            robots_url, f'returned {status}; treating the site as '
+                            'off limits until it answers')
+                    elif self._looks_like_a_challenge(response):
+                        # 200, but what came back is a bot-check page, not a
+                        # robots file. Parsing HTML as robots.txt is garbage in.
+                        rp.allow_all = True
+                        self._note_robots_unreadable(
+                            robots_url, 'answered with a bot-check page rather '
+                            'than a robots file')
                     else:
                         rp.parse(response.text.splitlines())
                     self._robots_cache[robots_url] = rp
-                except:
+                except Exception:
                     return True
 
             rp = self._robots_cache[robots_url]
@@ -962,6 +990,38 @@ class WebCrawler(LifecycleMixin, FetchingMixin, AnalysisPassesMixin,
 
         except Exception:
             return True
+
+    @staticmethod
+    def _looks_like_a_challenge(response):
+        """True when a 200 response is a bot check, not a robots.txt.
+
+        Cloudflare, Akamai and friends answer an automated client with an
+        interstitial that is HTML and has nothing to do with robots. Feeding
+        that to a robots parser is meaningless at best; what it must never do
+        is read as a rule.
+        """
+        content_type = (response.headers.get('Content-Type') or '').lower()
+        if 'html' in content_type:
+            return True
+        head = (response.text or '')[:2000].lower()
+        if '<html' in head or '<!doctype html' in head:
+            return True
+        markers = ('just a moment', 'checking your browser', 'cf-browser-verification',
+                   'enable javascript and cookies', 'attention required',
+                   'access denied', 'ddos protection')
+        return any(marker in head for marker in markers)
+
+    def _note_robots_unreadable(self, robots_url, why):
+        """Say once, loudly, that robots.txt could not be read, and what follows.
+
+        A crawl that quietly returns nothing because of this is the worst
+        outcome available: it looks exactly like a site with no pages.
+        """
+        if getattr(self, '_robots_notice_given', False):
+            return
+        self._robots_notice_given = True
+        print(f'robots.txt at {robots_url} {why}. '
+              f'Proceeding as RFC 9309 directs for an unreadable file.')
 
     def _note_crawl_delay(self, parser, user_agent):
         """Slow the crawl to a Crawl-delay the site published, if it is slower."""
