@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The agent layer, and how to give it a model | Toadstone docs</title>
+<meta name="description" content="How Toadstone can ask a language model to judge pages, why it is off by default, the three agentMode settings, and the Docker bridge for cli mode.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/agents.html">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/agents.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="The agent layer, and how to give it a model">
+<meta property="og:description" content="How Toadstone can ask a language model to judge pages, why it is off by default, the three agentMode settings, and the Docker bridge for cli mode.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/agents.html">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/agents.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="the-agent-layer-and-how-to-give-it-a-model">The agent layer, and how to give it a model</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>Toadstone can ask a language model to judge things a rule cannot: whether a
+page's content actually answers the query it targets, whether two pages are
+really competing or merely similar, whether a fix is worth making. Four kinds
+of agent exist — analysts that judge pages, a fixer that proposes changes, a
+monitor that watches a crawl, and the crawl-driving agents behind the MCP
+server.</p>
+<p><strong>It is switched off by default and that is deliberate.</strong> Turning it on means
+page text leaves the machine and calls cost money. A crawler that quietly did
+either — quietly spent someone's money, quietly sent a client's unpublished
+page text to a third party — would have broken a trust it was never given.
+So <code>agentMode</code> defaults to <code>none</code>, and nothing in the agent layer runs until
+somebody chooses otherwise.</p>
+<h2 id="the-three-modes">The three modes</h2>
+<table>
+<thead>
+<tr>
+<th><code>agentMode</code></th>
+<th>What happens</th>
+<th>What it costs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>Agent findings are skipped. Everything else works.</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>Calls the Anthropic API directly with <code>ANTHROPIC_API_KEY</code>.</td>
+<td>per token</td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td>Runs a local <code>claude</code> command, which bills to that installation's own account.</td>
+<td>a Claude subscription</td>
+</tr>
+</tbody>
+</table>
+<p><code>agentMaxPages</code> (default 25) caps how many pages any one crawl will send,
+because agents are slow and priced per page. <code>agentModel</code> defaults to
+<code>claude-sonnet-5-5</code>: these are short judgements about one page at a time, and
+Sonnet answers them well for a lot less than Opus.</p>
+<p>Settings → Advanced shows, in words, where page text is going before you
+commit to it.</p>
+<h2 id="cli-mode-in-docker-the-bridge"><code>cli</code> mode in Docker: the bridge</h2>
+<p><code>cli</code> mode runs <code>claude -p &lt;prompt&gt;</code> as a subprocess. That works when
+Toadstone runs natively on a machine with Claude Code installed. It cannot
+work in the Docker image, and no amount of bind-mounting fixes it: the CLI
+ships as a <strong>native binary for the host OS</strong>, so a macOS install will not
+execute inside a Linux container.</p>
+<p>The two ways out are to install the Linux build inside the container — which
+means putting a long-lived credential into the image and its volume — or to
+leave the CLI where it already is and let the container ask it a question.
+<code>tools/claude_bridge.py</code> does the second.</p>
+<pre><code>container                              host
+---------                              ----
+agents ──▶ claude_bridge_client.py ──HTTP──▶ claude_bridge.py ──▶ claude -p …
+           (stands in for the CLI)           127.0.0.1 only       keychain auth
+</code></pre>
+<p>Your credential never leaves the host, and never enters the image.</p>
+<h3 id="running-it">Running it</h3>
+<p>On the host:</p>
+<pre><code class="language-bash">python tools/claude_bridge.py
+</code></pre>
+<p>It prints the two values to give the container. Put the token in <code>.env</code>:</p>
+<pre><code>CLAUDE_BRIDGE_TOKEN=&lt;the token it printed&gt;
+</code></pre>
+<p>and in Settings → Advanced set:</p>
+<pre><code>agentMode        cli
+agentCliCommand  /app/tools/claude_bridge_client.py
+</code></pre>
+<p><code>docker-compose.yml</code> already passes <code>CLAUDE_BRIDGE_URL</code> and
+<code>CLAUDE_BRIDGE_TOKEN</code> through, defaulting the URL to
+<code>http://host.docker.internal:14898/ask</code>. Leaving the token empty keeps the
+whole thing off.</p>
+<p>The bridge has to be running for <code>cli</code> mode to answer. If it is not, agent
+findings fail with &quot;could not reach the Claude bridge&quot; rather than silently
+producing nothing — an integration that could not run must never look like a
+clean result.</p>
+<h3 id="what-the-bridge-will-and-will-not-do">What the bridge will and will not do</h3>
+<p>It exists to run a program on behalf of something else, which deserves to be
+narrow:</p>
+<ul>
+<li><strong>It binds <code>127.0.0.1</code> only.</strong> Docker Desktop reaches a loopback service
+through <code>host.docker.internal</code>, verified on this machine, so nothing listens
+on the network. On Linux, <code>extra_hosts</code> in the compose file provides the
+same name.</li>
+<li><strong>It runs exactly one command</strong>: the configured CLI, with <code>-p</code>, and a
+prompt. No shell, no argument passthrough, no second endpoint. A caller
+controls the prompt text and nothing else.</li>
+<li><strong>Every request carries a shared secret</strong>, compared in constant time. The
+token is generated on first run into <code>~/.toadstone/claude-bridge.token</code>
+with <code>0600</code> permissions.</li>
+<li><strong>One call at a time</strong>, a 200 KB cap on the prompt, and a timeout on the
+child, so a crawl that found forty pages worth judging cannot start forty
+CLIs at once.</li>
+<li><strong>Prompts are never logged.</strong> They are someone's page text. The access log
+records the method, the path and the status.</li>
+</ul>
+<p>The threat it is built against is a prompt that tries to run a command. The
+bridge passes an argument list to <code>subprocess.run</code> with no shell, so the
+metacharacters that would matter are just characters. <code>tests/bridge_tests.py</code>
+proves it by trying: <code>; touch</code>, <code>&amp;&amp;</code>, <code>$( )</code>, backticks, a pipe and a newline,
+each asserted to leave no file behind and to arrive at the CLI verbatim.</p>
+<p>What it is <em>not</em> built against is someone who already has the token and can
+reach the port — they can spend your Claude quota on arbitrary prompts. The
+token file is owner-only and the socket is loopback-only; if neither of those
+holds on your machine, do not run the bridge.</p>
+<h2 id="tests">Tests</h2>
+<pre><code class="language-bash">python tests/bridge_tests.py     # 32 checks, no Claude needed
+python tests/agent_tests.py      # 61 checks, the agent layer itself
+</code></pre>
+<p>The bridge tests start a real server on an ephemeral loopback port with a
+stand-in for the CLI. Those stand-ins are written rather than borrowed from
+<code>/bin</code>, because the obvious candidates are not portable — macOS has no
+<code>/bin/false</code> or <code>/bin/true</code>, and <code>/bin/sleep</code> rejects <code>-p</code>. The first version
+of this suite used them and reported a passing test for &quot;a failing CLI&quot; that
+was really exercising &quot;command not found&quot;.</p>
+<hr />
+<p>Last updated: 2026-10-20. Source: <a href="https://github.com/spcaeo/toadstone/blob/main/docs/agents.md">docs/agents.md on GitHub</a>.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>

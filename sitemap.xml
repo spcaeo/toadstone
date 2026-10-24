@@ -2,4 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://spcaeo.github.io/toadstone/</loc><lastmod>2026-10-24</lastmod><priority>1.0</priority></url>
   <url><loc>https://spcaeo.github.io/toadstone/watch.html</loc><lastmod>2026-10-24</lastmod><priority>0.8</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/</loc><lastmod>2026-10-20</lastmod><priority>0.8</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/checks.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/mcp.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/agent-handoff.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/agents.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/google.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/plugins.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+  <url><loc>https://spcaeo.github.io/toadstone/docs/about-the-name.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
 </urlset>

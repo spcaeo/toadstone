@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing a plugin | Toadstone docs</title>
+<meta name="description" content="How to add a tab to Toadstone with one JavaScript file and no build step, with the registration API, lifecycle hooks and styling classes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/plugins.html">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/plugins.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Writing a plugin">
+<meta property="og:description" content="How to add a tab to Toadstone with one JavaScript file and no build step, with the registration API, lifecycle hooks and styling classes.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/plugins.html">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/plugins.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="writing-a-plugin">Writing a plugin</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>Every tab after <strong>Rules</strong> in the strip is a plugin: <code>E-E-A-T</code> and <code>About</code> are
+both files in <code>web/static/plugins/</code>, loaded at startup, with no build step and
+no framework. A plugin gets a tab, a container to render into, and the crawl
+data as it arrives.</p>
+<p><code>web/static/plugins/about.js</code> is the shortest complete example (~180 lines) and
+<code>e-e-a-t.js</code> is the serious one — it scores every crawled page and redraws as a
+live crawl streams in.</p>
+<hr />
+<p>Drop your custom plugin files in <code>/web/static/plugins/</code>! Each <code>.js</code> file will automatically create a new tab in Toadstone.</p>
+<h2 id="-quick-start">🔌 Quick Start</h2>
+<ol>
+<li>Create a new <code>.js</code> file in <code>web/static/plugins/</code> (e.g. <code>my-plugin.js</code>)</li>
+<li>Register it with <code>ToadstonePlugin.register({...})</code></li>
+<li><strong>Add the filename to <code>manualPlugins</code> in <code>web/static/js/plugin-loader.js</code>.</strong>
+There is no directory listing to discover it from, so a plugin that is not
+in that array is a file nobody loads — and it fails by doing nothing, which
+is the worst way to fail.</li>
+<li>Reload the app; the tab appears at the end of the strip.</li>
+</ol>
+<h2 id="-example-plugin-structure">📝 Example Plugin Structure</h2>
+<pre><code class="language-javascript">ToadstonePlugin.register({
+  // Required: Unique ID (used for tab identification)
+  id: 'my-plugin',
+
+  // Required: Display name
+  name: 'My Plugin',
+
+  // Required: Tab configuration
+  tab: {
+    label: 'My Tab',
+    iconName: 'zap',   // a name from the app's icon set; window.ToadstoneIcons.names
+    icon: '🔥',        // or an emoji, if you would rather
+    position: 'end',
+  },
+
+  // Called when your tab is activated
+  onTabActivate(container, data) {
+    // data contains: { urls, links, issues, stats }
+    container.innerHTML = `
+      &lt;div class=&quot;plugin-content&quot; style=&quot;padding: 20px; overflow-y: auto; max-height: calc(100vh - 280px);&quot;&gt;
+        &lt;h2&gt;My Custom Analysis&lt;/h2&gt;
+        &lt;p&gt;Found ${data.urls.length} URLs!&lt;/p&gt;
+      &lt;/div&gt;
+    `;
+  },
+
+  // Optional: Called during live crawls when data updates
+  onDataUpdate(data) {
+    if (this.isActive) {
+      // Update your UI
+    }
+  }
+});
+</code></pre>
+<h2 id="-available-data">🎯 Available Data</h2>
+<p>Your plugin receives the same data as built-in tabs:</p>
+<ul>
+<li><strong><code>urls</code></strong> - Array of all crawled URLs with full metadata</li>
+<li><strong><code>links</code></strong> - All discovered links (internal/external)</li>
+<li><strong><code>issues</code></strong> - Detected SEO issues</li>
+<li><strong><code>stats</code></strong> - Crawl statistics (discovered, crawled, depth, speed)</li>
+</ul>
+<h2 id="-full-api-reference">📚 Full API Reference</h2>
+<h3 id="plugin-configuration">Plugin Configuration</h3>
+<pre><code class="language-javascript">{
+  id: string,              // Unique identifier
+  name: string,            // Display name
+  version: string,         // Optional version
+  author: string,          // Optional author
+  description: string,     // Optional description
+
+  tab: {
+    label: string,         // Tab button text
+    icon: string,          // Optional emoji/icon
+    position: number       // Optional position (default: append to end)
+  }
+}
+</code></pre>
+<h3 id="lifecycle-hooks">Lifecycle Hooks</h3>
+<ul>
+<li><code>onLoad()</code> - Called when plugin loads</li>
+<li><code>onTabActivate(container, data)</code> - Called when tab becomes active</li>
+<li><code>onTabDeactivate()</code> - Called when user switches away</li>
+<li><code>onDataUpdate(data)</code> - Called during live crawls</li>
+<li><code>onCrawlComplete(data)</code> - Called when crawl finishes</li>
+</ul>
+<h3 id="utilities">Utilities</h3>
+<p>Access built-in utilities via <code>this.utils</code>:</p>
+<pre><code class="language-javascript">this.utils.showNotification(message, type) // 'success', 'error', 'info'
+this.utils.formatUrl(url)
+this.utils.escapeHtml(text)
+</code></pre>
+<h3 id="-styling">🎨 Styling</h3>
+<p>Use these CSS classes to match Toadstone's design:</p>
+<ul>
+<li><code>.plugin-content</code> - Main container</li>
+<li><code>.plugin-header</code> - Header section</li>
+<li><code>.data-table</code> - Tables (auto-styled)</li>
+<li><code>.stat-card</code> - Statistic cards</li>
+<li><code>.score-good</code> / <code>.score-needs-improvement</code> / <code>.score-poor</code> - Score indicators</li>
+</ul>
+<p><strong>Important:</strong> Always add these styles to your main plugin container for proper scrolling:</p>
+<pre><code class="language-javascript">container.innerHTML = `
+  &lt;div class=&quot;plugin-content&quot; style=&quot;padding: 20px; overflow-y: auto; max-height: calc(100vh - 280px);&quot;&gt;
+    &lt;!-- Your content here --&gt;
+  &lt;/div&gt;
+`;
+</code></pre>
+<p>The <code>max-height: calc(100vh - 280px)</code> ensures your content scrolls properly within the tab pane.</p>
+<h3 id="example-plugins">Example Plugins</h3>
+<p>Check out these example plugins to get started:</p>
+<ul>
+<li><code>about.js</code> — the shortest complete plugin: one tab, some prose, and one live
+figure fetched from <code>/api/checks</code>. Start here.</li>
+<li><code>e-e-a-t.js</code> — the serious one: scores every crawled page across four pillars,
+redraws as a live crawl streams in (coalesced to one render a second so the
+tab does not stutter), and shows the evidence behind every number.</li>
+<li><code>_example-plugin.js</code> — a bare template. The leading underscore keeps the
+loader from picking it up.</li>
+</ul>
+<h2 id="rendering-icons-inside-your-panel">Rendering icons inside your panel</h2>
+<p>Icon placeholders in HTML you insert are inert until they are swapped for SVG:</p>
+<pre><code class="language-javascript">container.innerHTML = '&lt;i data-icon=&quot;zap&quot; data-icon-size=&quot;13&quot;&gt;&lt;/i&gt; Ready';
+if (typeof window.renderIcons === 'function') window.renderIcons(container);
+</code></pre>
+<p>The global is <code>renderIcons</code>. Calling a plausible-looking <code>window.Icons.render</code>
+instead throws nothing and renders nothing, which cost an hour the first time.</p>
+<hr />
+<p>Last updated: 2026-10-20. Source: <a href="https://github.com/spcaeo/toadstone/blob/main/docs/plugins.md">docs/plugins.md on GitHub</a>.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>

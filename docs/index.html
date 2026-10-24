@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toadstone documentation | Toadstone docs</title>
+<meta name="description" content="Documentation for Toadstone, a free, self-hosted SEO crawler: the check reference, the MCP server, the agent handoff, the agent layer, Google Search Console and Analytics, plugins, and the name.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/index.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Toadstone documentation">
+<meta property="og:description" content="Documentation for Toadstone, a free, self-hosted SEO crawler: the check reference, the MCP server, the agent handoff, the agent layer, Google Search Console and Analytics, plugins, and the name.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/index.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="toadstone-documentation">Toadstone documentation</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>Toadstone is a free, self-hosted SEO crawler, source-available under the Elastic License 2.0 (not OSI open source). The documentation below is the same text that ships in the repository at <a href="https://github.com/spcaeo/toadstone/tree/main/docs">docs/ on GitHub</a>.</p>
+<h2 id="pages">Pages</h2>
+<ul>
+<li><a href="https://spcaeo.github.io/toadstone/docs/checks.html">The check reference</a> (<a href="https://spcaeo.github.io/toadstone/docs/checks.md">Markdown</a>): Every check Toadstone can report (222 in total), with its slug, its severity and what to do about it.</li>
+<li><a href="https://spcaeo.github.io/toadstone/docs/mcp.html">Toadstone MCP server</a> (<a href="https://spcaeo.github.io/toadstone/docs/mcp.md">Markdown</a>): Ten tools that let a coding agent read a crawl and find what is wrong with a site, read-only by default, with setup for Claude Code and Cursor, its guardrails and its transports.</li>
+<li><a href="https://spcaeo.github.io/toadstone/docs/agent-handoff.html">Agent handoff: fix the SEO issues from a Toadstone crawl</a> (<a href="https://spcaeo.github.io/toadstone/docs/agent-handoff.md">Markdown</a>): A paste-in prompt that hands a crawl to a coding agent: read the issues over the HTTP API, fix them in the site code, re-crawl and compare.</li>
+<li><a href="https://spcaeo.github.io/toadstone/docs/agents.html">The agent layer, and how to give it a model</a> (<a href="https://spcaeo.github.io/toadstone/docs/agents.md">Markdown</a>): How Toadstone can ask a language model to judge pages, why it is off by default, the three agentMode settings, and the Docker bridge for cli mode.</li>
+<li><a href="https://spcaeo.github.io/toadstone/docs/google.html">Connecting Google Search Console and Analytics</a> (<a href="https://spcaeo.github.io/toadstone/docs/google.md">Markdown</a>): The one-time OAuth client setup, the four read-only scopes, where the credential is stored and how errors are explained.</li>
+<li><a href="https://spcaeo.github.io/toadstone/docs/plugins.html">Writing a plugin</a> (<a href="https://spcaeo.github.io/toadstone/docs/plugins.md">Markdown</a>): How to add a tab to Toadstone with one JavaScript file and no build step, with the registration API, lifecycle hooks and styling classes.</li>
+<li><a href="https://spcaeo.github.io/toadstone/docs/about-the-name.html">The name</a> (<a href="https://spcaeo.github.io/toadstone/docs/about-the-name.md">Markdown</a>): Why the tool is called Toadstone, what a toadstone was, and where the project comes from: a fork of LibreCrawl.</li>
+</ul>
+<h2 id="elsewhere">Elsewhere</h2>
+<ul>
+<li><a href="https://spcaeo.github.io/toadstone/">Live demo</a>: the real interface, frozen over a real crawl, no sign-up.</li>
+<li><a href="https://spcaeo.github.io/toadstone/watch.html">Guided tour</a>: a short video tour.</li>
+<li><a href="https://github.com/spcaeo/toadstone">Source code and README</a>: Toadstone on GitHub.</li>
+<li><a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>: the machine-readable index of these docs.</li>
+</ul>
+<p>Last updated: 2026-10-20.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>

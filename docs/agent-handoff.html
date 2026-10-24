@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent handoff: fix the SEO issues from a Toadstone crawl | Toadstone docs</title>
+<meta name="description" content="A paste-in prompt that hands a crawl to a coding agent: read the issues over the HTTP API, fix them in the site code, re-crawl and compare.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/agent-handoff.html">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/agent-handoff.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Agent handoff: fix the SEO issues from a Toadstone crawl">
+<meta property="og:description" content="A paste-in prompt that hands a crawl to a coding agent: read the issues over the HTTP API, fix them in the site code, re-crawl and compare.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/agent-handoff.html">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/agent-handoff.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="agent-handoff-fix-the-seo-issues-from-a-toadstone-crawl">Agent handoff: fix the SEO issues from a Toadstone crawl</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>Paste this into another Claude Code session (or tell it to read this file and
+follow it) after filling in the placeholders:</p>
+<ul>
+<li><code>&lt;PATH TO THE SITE'S REPO&gt;</code>: where the website's code lives</li>
+<li><code>&lt;SITE URL&gt;</code>: the site that was crawled</li>
+<li><code>&lt;CRAWL ID&gt;</code>: the crawl to work from (<code>/api/crawls/list</code> shows them)</li>
+<li><code>&lt;DEV PORT&gt;</code>: the port the site runs on locally</li>
+</ul>
+<hr />
+<p>Fix the SEO issues Toadstone found in crawl <code>&lt;CRAWL ID&gt;</code> of <code>&lt;SITE URL&gt;</code>,
+then re-run the crawl to prove they are fixed.
+The website code is in: <code>&lt;PATH TO THE SITE'S REPO&gt;</code></p>
+<h2 id="1-connect-to-toadstone">1. Connect to Toadstone</h2>
+<p>Toadstone runs at http://localhost:5000 in local mode (whatever you set
+<code>EXTERNAL_PORT</code> to; 5000 is the default): no API key, just a
+session cookie that you get by opening the home page.</p>
+<pre><code class="language-bash">B=http://localhost:5000; J=/tmp/toadstone-cookies.txt
+curl -s -c $J -o /dev/null $B/          # auto-login, saves the session cookie
+</code></pre>
+<p>Use <code>-b $J -c $J</code> on every call after this.</p>
+<h2 id="2-read-the-crawl">2. Read the crawl</h2>
+<p>Every crawl is saved by ID. This returns one crawl as JSON: the crawl record
+plus all its <code>issues</code>, <code>urls</code> (page data) and <code>links</code>:</p>
+<pre><code class="language-bash">curl -s -b $J -c $J $B/api/crawls/1 &gt; crawl-1.json
+</code></pre>
+<ul>
+<li><code>crawl</code>: <code>id</code>, <code>base_url</code>, <code>status</code>, <code>urls_crawled</code>, <code>started_at</code>, <code>completed_at</code></li>
+<li><code>issues[]</code>: <code>url</code>, <code>type</code> (<code>error</code> / <code>warning</code> / <code>info</code>), <code>category</code>, <code>issue</code>, <code>details</code></li>
+<li><code>urls[]</code>: <code>url</code>, <code>status_code</code>, <code>title</code>, <code>meta_description</code>, <code>h1</code>, <code>h2</code>,
+<code>canonical_url</code>, <code>word_count</code>, <code>robots</code>, <code>images</code>, <code>linked_from</code>, <code>response_time</code>, ...</li>
+</ul>
+<p>Quick summary of the issues:</p>
+<pre><code class="language-bash">python3 -c '
+import json, collections
+d = json.load(open(&quot;crawl-1.json&quot;))
+for (t, i), n in collections.Counter((x[&quot;type&quot;], x[&quot;issue&quot;]) for x in d[&quot;issues&quot;]).most_common():
+    print(f&quot;{n:5}  {t:8} {i}&quot;)'
+</code></pre>
+<p>A human can look at the same crawl at http://localhost:5000/crawl/1/issues?severity=error</p>
+<h2 id="3-rules">3. Rules</h2>
+<ul>
+<li>Use only the HTTP API. Never open <code>data/users.db</code> directly: reading it from
+outside the container while the app writes has corrupted it before.</li>
+<li>Never restart or rebuild the <code>toadstone</code> Docker container, and never delete
+crawls you did not create. The user may have a crawl running.</li>
+<li>Don't change Toadstone settings. They are shared with the user's account.</li>
+</ul>
+<h2 id="4-what-to-fix">4. What to fix</h2>
+<p>Read the findings rather than being told them: <code>/api/crawls/&lt;id&gt;/issues</code>
+returns every one, with a <code>check</code> slug, an <code>evidence</code> block and a <code>how_to_fix</code>
+line. Group by <code>check</code> before you start — forty pages missing a canonical is
+one template, not forty jobs.</p>
+<p>A worked example, from a crawl of the fixture site that ships in this repo
+(<code>python tests/coverage_site.py</code> serves it), so you can reproduce the shape
+before pointing this at anything real:</p>
+<pre><code> 60 x no_structured_data        error    one layout, one fix
+  4 x broken_image_404          error    3 files, referenced from the shared header
+  4 x links_to_broken_urls      error    evidence.related_urls names each one
+  2 x a11y_image-alt            error    axe-core rule, same component twice
+  1 x canonical_cross_domain    error    a copied template kept the old domain
+  1 x modified_before_published error    a date field written in the wrong order
+ 64 x meta_description_too_short warning  a generator truncating at 50 chars
+</code></pre>
+<p>Seven groups, not 136 jobs. The counts come from the <code>check</code> field; the
+<code>evidence.related_urls</code> and <code>evidence.found</code> fields tell you which file to open
+without re-fetching the page.</p>
+<p>Work through the issues by priority (errors first), grouping fixes by page
+template rather than editing page by page. Show me the plan before large
+changes.</p>
+<h2 id="5-re-run-the-crawl-after-fixing">5. Re-run the crawl after fixing</h2>
+<h3 id="5a-pick-what-to-crawl">5a. Pick what to crawl</h3>
+<ul>
+<li><strong>Before deploying</strong>: run the site locally and crawl the dev server.
+Toadstone runs in Docker, so from its point of view the host machine is
+<code>host.docker.internal</code>, not <code>localhost</code>:
+<code>http://host.docker.internal:&lt;DEV PORT&gt;/</code></li>
+<li><strong>After deploying</strong>: crawl production, <code>https://example.com/</code></li>
+</ul>
+<p>Make sure the dev server is reachable first:</p>
+<pre><code class="language-bash">curl -s -o /dev/null -w '%{http_code}\n' http://localhost:&lt;DEV PORT&gt;/   # expect 200
+</code></pre>
+<h3 id="5b-start-the-crawl-and-note-its-id">5b. Start the crawl and note its ID</h3>
+<pre><code class="language-bash">TARGET=&quot;http://host.docker.internal:&lt;DEV PORT&gt;/&quot;
+NEW=$(curl -s -b $J -c $J -H 'Content-Type: application/json' \
+        -d &quot;{\&quot;url\&quot;: \&quot;$TARGET\&quot;}&quot; $B/api/start_crawl \
+      | python3 -c 'import json,sys; print(json.load(sys.stdin)[&quot;crawl_id&quot;])')
+echo &quot;New crawl: $NEW   watch it at $B/crawl/$NEW&quot;
+</code></pre>
+<p>It uses the user's saved settings (JavaScript rendering, depth, robots.txt,
+and so on), so results are comparable with crawl 24.</p>
+<h3 id="5c-wait-for-it-to-finish">5c. Wait for it to finish</h3>
+<p>The crawl runs in your session; <code>crawl_status</code> reports on it:</p>
+<pre><code class="language-bash">while :; do
+  STATUS=$(curl -s -b $J -c $J &quot;$B/api/crawl_status?stats_only=1&quot; \
+    | python3 -c 'import json,sys; d=json.load(sys.stdin); s=d[&quot;stats&quot;]; print(d[&quot;status&quot;], s[&quot;crawled&quot;], &quot;/&quot;, s[&quot;discovered&quot;])')
+  echo &quot;$STATUS&quot;
+  case &quot;$STATUS&quot; in running*) sleep 10 ;; *) break ;; esac
+done
+</code></pre>
+<p>It ends on <code>completed</code>. The site has about 90 pages; with JavaScript rendering
+this takes 2-3 minutes. <code>POST $B/api/stop_crawl</code> stops it early.</p>
+<h3 id="5d-read-the-new-run">5d. Read the new run</h3>
+<p>Exactly like step 2, with the new ID:</p>
+<pre><code class="language-bash">curl -s -b $J -c $J $B/api/crawls/$NEW &gt; crawl-$NEW.json
+</code></pre>
+<h3 id="5e-compare-with-crawl-1">5e. Compare with crawl 1</h3>
+<p>Issues are matched by page path and issue name, so a dev-server crawl can be
+compared with the production crawl:</p>
+<pre><code class="language-bash">python3 - 1 $NEW &lt;&lt;'EOF'
+import json, sys
+from urllib.parse import urlsplit
+
+def issues(crawl_id):
+    data = json.load(open(f'crawl-{crawl_id}.json'))
+    keyed = {}
+    for i in data['issues']:
+        u = urlsplit(i['url'])
+        path = (u.path.rstrip('/') or '/') + (f'?{u.query}' if u.query else '')
+        keyed[(path, i['issue'])] = i['type']
+    return keyed
+
+old_id, new_id = sys.argv[1], sys.argv[2]
+old, new = issues(old_id), issues(new_id)
+fixed = sorted(old.keys() - new.keys())
+still = sorted(old.keys() &amp; new.keys())
+added = sorted(new.keys() - old.keys())
+print(f'crawl {old_id} -&gt; {new_id}: {len(fixed)} fixed, {len(still)} remaining, {len(added)} new')
+for title, rows, src in (('NEW (regressions)', added, new), ('REMAINING', still, new), ('FIXED', fixed, old)):
+    print(f'\n{title}:')
+    for path, issue in rows:
+        print(f'  {src[(path, issue)]:8} {issue:32} {path}')
+EOF
+</code></pre>
+<p>Anything under <strong>NEW</strong> is a regression introduced by the changes; fix it before
+reporting back.</p>
+<h3 id="5f-report-back">5f. Report back</h3>
+<p>Give the user:</p>
+<ul>
+<li>the new crawl ID and its links:
+<code>http://localhost:5000/crawl/&lt;NEW&gt;/issues</code> (all issues) and
+<code>http://localhost:5000/crawl/&lt;NEW&gt;/issues?severity=error</code> (errors only)</li>
+<li>the fixed / remaining / new counts from 5e, and what is left and why</li>
+</ul>
+<h2 id="6-finding-runs-later">6. Finding runs later</h2>
+<pre><code class="language-bash"># Latest crawls, newest first: id, site, status, pages
+curl -s -b $J -c $J &quot;$B/api/crawls/list?limit=10&quot; \
+  | python3 -c 'import json,sys; [print(c[&quot;id&quot;], c[&quot;base_url&quot;], c[&quot;status&quot;], c[&quot;urls_crawled&quot;], c[&quot;started_at&quot;]) for c in json.load(sys.stdin)[&quot;crawls&quot;]]'
+
+# One crawl's status only
+curl -s -b $J -c $J $B/api/crawls/&lt;ID&gt; | python3 -c 'import json,sys; c=json.load(sys.stdin)[&quot;crawl&quot;]; print(c[&quot;status&quot;], c[&quot;urls_crawled&quot;], c[&quot;completed_at&quot;])'
+</code></pre>
+<p>In the browser, every crawl has a page at <code>http://localhost:5000/crawl/&lt;ID&gt;</code>,
+and the dashboard (<code>http://localhost:5000/?dashboard=1</code>) lists them all with
+their IDs.</p>
+<h2 id="reusing-this-for-another-crawl">Reusing this for another crawl</h2>
+<p>Everything except section 4 works for any crawl: replace <code>1</code> with the crawl ID
+from the dashboard's <strong>ID</strong> column (or the number in <code>/crawl/&lt;id&gt;/...</code>), and
+let the agent build its own fix list from the issues in step 2.</p>
+<hr />
+<p>Last updated: 2026-10-20. Source: <a href="https://github.com/spcaeo/toadstone/blob/main/docs/agent-handoff.md">docs/agent-handoff.md on GitHub</a>.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>

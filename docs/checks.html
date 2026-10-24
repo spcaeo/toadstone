@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The check reference | Toadstone docs</title>
+<meta name="description" content="Every check Toadstone can report (222 in total), with its slug, its severity and what to do about it.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/checks.html">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/checks.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="The check reference">
+<meta property="og:description" content="Every check Toadstone can report (222 in total), with its slug, its severity and what to do about it.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/checks.html">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/checks.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="the-check-reference">The check reference</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>Every check Toadstone can report, with its slug, its severity and what to
+do about it. <strong>This file is generated</strong> from a running install's own
+catalogue (<code>tools/generate_checks_doc.py</code>), so it cannot drift from the
+wording the code actually uses.</p>
+<p>The slug is the stable part. It is what the API filters on, what a finding
+carries in its <code>check</code> field, and what <code>/checks#&lt;slug&gt;</code> links to in the
+running app. Names and wording may be improved; slugs are not renamed
+without a reason.</p>
+<p><strong>180 of these have been observed firing in a real crawl</strong> of the
+deliberately broken fixture site in <code>tests/coverage_site.py</code>, across its
+several modes. Those are marked ✅. A check with no mark is not a check
+that does not work - it is one this fixture has no page for yet, and
+that is a gap in the fixture, recorded rather than hidden.</p>
+<hr />
+<h2 id="amp--13-checks">AMP  <sub>13 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>AMP Boilerplate Missing</strong><br><code>amp_boilerplate_missing</code></td>
+<td>🔴 error</td>
+<td>Paste the boilerplate from the AMP specification into the head, unchanged.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>AMP Page Has No Canonical</strong><br><code>amp_canonical_missing</code></td>
+<td>🔴 error</td>
+<td>Add a rel=canonical link pointing at the non-AMP page, or at this page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>AMP Charset Missing</strong><br><code>amp_charset_missing</code></td>
+<td>🔴 error</td>
+<td>Make &lt;meta charset=&quot;utf-8&quot;&gt; the first element in the head.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Author JavaScript in AMP</strong><br><code>amp_custom_javascript</code></td>
+<td>🔴 error</td>
+<td>Remove the script, or express the behaviour with an AMP component.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>External Stylesheet in AMP</strong><br><code>amp_external_stylesheet</code></td>
+<td>🔴 error</td>
+<td>Inline the CSS into &lt;style amp-custom&gt; and remove the stylesheet link.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Tag Not Allowed in AMP</strong><br><code>amp_forbidden_tag</code></td>
+<td>🔴 error</td>
+<td>Swap each tag for its AMP component and load that component's extension script.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Inline style Attribute in AMP</strong><br><code>amp_inline_style</code></td>
+<td>🔴 error</td>
+<td>Move those declarations into the &lt;style amp-custom&gt; block as classes.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>More Than One amp-custom Block</strong><br><code>amp_multiple_custom_styles</code></td>
+<td>🔴 error</td>
+<td>Merge every custom style into one &lt;style amp-custom&gt; block.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>AMP Runtime Not Loaded</strong><br><code>amp_runtime_missing</code></td>
+<td>🔴 error</td>
+<td>Add &lt;script async src=&quot;https://cdn.ampproject.org/v0.js&quot;&gt;&lt;/script&gt; to the head.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>AMP Viewport Missing</strong><br><code>amp_viewport_missing</code></td>
+<td>🔴 error</td>
+<td>Add &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt; to the head.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>AMP Link Points at a Page That Is Not AMP</strong><br><code>amphtml_target_not_amp</code></td>
+<td>🔴 error</td>
+<td>Point rel=amphtml at the real AMP page, or remove the link.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Canonical Page Does Not Link Back to the AMP Version</strong><br><code>amphtml_missing_canonical</code></td>
+<td>🟠 warning</td>
+<td>Add &lt;link rel=&quot;amphtml&quot; href=&quot;...&quot;&gt; to the canonical page.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>AMP Version Was Not Crawled</strong><br><code>amphtml_target_not_crawled</code></td>
+<td>🔵 info</td>
+<td>Include the AMP URL in the crawl, or check it separately.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="accessibility--11-checks">Accessibility  <sub>11 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Buttons must have discernible text</strong><br><code>a11y_button-name</code></td>
+<td>🔴 error</td>
+<td>Buttons must have discernible text</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Elements must meet minimum color contrast ratio thresholds</strong><br><code>a11y_color-contrast</code></td>
+<td>🔴 error</td>
+<td>Elements must meet minimum color contrast ratio thresholds</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Documents must have &lt;title&gt; element to aid in navigation</strong><br><code>a11y_document-title</code></td>
+<td>🔴 error</td>
+<td>Documents must have &lt;title&gt; element to aid in navigation</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>&lt;html&gt; element must have a lang attribute</strong><br><code>a11y_html-has-lang</code></td>
+<td>🔴 error</td>
+<td>&lt;html&gt; element must have a lang attribute</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Images must have alternative text</strong><br><code>a11y_image-alt</code></td>
+<td>🔴 error</td>
+<td>Images must have alternative text</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Form elements must have labels</strong><br><code>a11y_label</code></td>
+<td>🔴 error</td>
+<td>Form elements must have labels</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Links must have discernible text</strong><br><code>a11y_link-name</code></td>
+<td>🔴 error</td>
+<td>Links must have discernible text</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Scrollable region must have keyboard access</strong><br><code>a11y_scrollable-region-focusable</code></td>
+<td>🔴 error</td>
+<td>Scrollable region must have keyboard access</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Images Without Alt Text</strong><br><code>images_missing_alt</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Missing Language Attribute</strong><br><code>missing_lang</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Accessibility Check Did Not Run</strong><br><code>a11y_check_failed</code></td>
+<td>🔵 info</td>
+<td>Report this as a LibreCrawl bug if it happens on every page.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cms--7-checks">CMS  <sub>7 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Placeholder Value In A CMS Field</strong><br><code>cms_field_placeholder</code></td>
+<td>🔴 error</td>
+<td>Fill the field in with real content, or clear it so the template falls back instead of printing the placeholder.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Structured Data Stripped By The Front End</strong><br><code>cms_structured_data_stripped</code></td>
+<td>🔴 error</td>
+<td>Render the JSON-LD block from the CMS content in the page template, or remove it from the CMS so the two agree.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Published Item Never Crawled</strong><br><code>cms_not_crawled</code></td>
+<td>🟠 warning</td>
+<td>Link the published URL from the site so it can be reached, and check that robots.txt and the crawl scope do not exclude it.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Published Item Missing From The Sitemap</strong><br><code>cms_published_not_in_sitemap</code></td>
+<td>🟠 warning</td>
+<td>Include the published URL in the XML sitemap, or unpublish it.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>CMS SEO Description Too Long</strong><br><code>cms_seo_description_too_long</code></td>
+<td>🟠 warning</td>
+<td>Shorten the SEO description in the CMS to the configured limit.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>CMS SEO Title Too Long</strong><br><code>cms_seo_title_too_long</code></td>
+<td>🟠 warning</td>
+<td>Shorten the SEO title in the CMS to the configured limit.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Stray Whitespace In A CMS Field</strong><br><code>cms_stray_whitespace</code></td>
+<td>🟠 warning</td>
+<td>Trim the leading, trailing and doubled spaces out of the field.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="content--4-checks">Content  <sub>4 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Broken Image (404)</strong><br><code>broken_image_404</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Broken Image (503)</strong><br><code>broken_image_503</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Content Removed</strong><br><code>content_removed</code></td>
+<td>🟠 warning</td>
+<td>Restore the missing copy, or confirm the deletion was intended - compare this page against the previous crawl before publishing.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Thin Content</strong><br><code>thin_content</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="duplication--1-checks">Duplication  <sub>1 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Duplicate Content Detected</strong><br><code>duplicate_content</code></td>
+<td>🟠 warning</td>
+<td>Keep one page as the canonical version of this content and either rewrite the others or point their rel=canonical at it.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="freshness--8-checks">Freshness  <sub>8 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Future Date</strong><br><code>future_date</code></td>
+<td>🔴 error</td>
+<td>Correct the JSON-LD datePublished value to the real publication or modification time; a future date suppresses indexing and misreports freshness.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Modified Before Published</strong><br><code>modified_before_published</code></td>
+<td>🔴 error</td>
+<td>Set the modified date to the real last-edit time, or to the published date when the page has never been edited.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Published Dates Come From One Machine Run</strong><br><code>dates_from_one_machine_run</code></td>
+<td>🟠 warning</td>
+<td>Store a publication date per page when it first goes live and never rewrite it. If these pages really were published in one batch, give them all the same timestamp and accept this issue.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Dates Taken From the Clock, Not the Content</strong><br><code>dates_read_at_render</code></td>
+<td>🟠 warning</td>
+<td>Take the published date from the content's own metadata and the modified date from its last real edit, rather than calling the clock while the page renders.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Invalid Date Format</strong><br><code>invalid_date_format</code></td>
+<td>🟠 warning</td>
+<td>Append the timezone offset (for example +00:00 or Z) to the JSON-LD dateModified value.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Missing Article Dates</strong><br><code>missing_dates</code></td>
+<td>🟠 warning</td>
+<td>Add datePublished and dateModified to the Article JSON-LD block as ISO-8601 values with a timezone offset.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Modified Date Mismatch</strong><br><code>modified_date_mismatch</code></td>
+<td>🟠 warning</td>
+<td>Make one source authoritative - usually the CMS modified timestamp - and derive the JSON-LD, meta tag, sitemap lastmod and visible date from it.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Stale Content</strong><br><code>stale_content</code></td>
+<td>🔵 info</td>
+<td>Review and refresh the content, then bump dateModified, article:modified_time and the sitemap lastmod together.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="indexability--2-checks">Indexability  <sub>2 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong>Nofollow Tag Present</strong><br><code>nofollow</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Noindex Tag Present</strong><br><code>noindex</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="links--12-checks">Links  <sub>12 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Ambiguous Anchor Text</strong><br><code>ambiguous_anchor</code></td>
+<td>🟠 warning</td>
+<td>Give each target its own anchor, so one phrase means one page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Page Too Deep</strong><br><code>deep_page</code></td>
+<td>🟠 warning</td>
+<td>Link to the page from a shallower hub so it sits within a few clicks.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Internal Link Removed</strong><br><code>internal_link_removed</code></td>
+<td>🟠 warning</td>
+<td>Restore the links, or confirm they were removed on purpose - check whether a template or menu change dropped them site-wide.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Orphan Page</strong><br><code>orphan_page</code></td>
+<td>🟠 warning</td>
+<td>Add a link from the body copy of a related page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Self-Cannibalising Anchor Text</strong><br><code>self_cannibalising_anchor</code></td>
+<td>🟠 warning</td>
+<td>Point the keyword anchor at the page that targets it, or reword it.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Page Reachable Only From the Sitemap</strong><br><code>sitemap_only_page</code></td>
+<td>🟠 warning</td>
+<td>Link to the page from a relevant page, or drop it from the sitemap.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Generic Anchor Text</strong><br><code>generic_anchor</code></td>
+<td>🔵 info</td>
+<td>Replace the anchor with words describing the target page.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Inconsistent Anchor Text</strong><br><code>inconsistent_anchors</code></td>
+<td>🔵 info</td>
+<td>Settle on one or two anchors per target and use them consistently.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Section Hub Not Linked</strong><br><code>missing_parent_link</code></td>
+<td>🔵 info</td>
+<td>Link to the section hub from the page, usually in a breadcrumb.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>One-Way Internal Link</strong><br><code>one_way_pair</code></td>
+<td>🔵 info</td>
+<td>Add a link back where the two pages are genuinely related.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Internal Links Carry Tracking Parameters</strong><br><code>tracking_parameters_on_internal_links</code></td>
+<td>🔵 info</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Weakly Linked Page</strong><br><code>weak_page</code></td>
+<td>🔵 info</td>
+<td>Add content links from related pages so the page earns its place.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mobile--1-checks">Mobile  <sub>1 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong>Missing Viewport Meta Tag</strong><br><code>missing_viewport</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="performance--4-checks">Performance  <sub>4 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Large Page Size</strong><br><code>large_page_size</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Slow Response Time</strong><br><code>slow_response_time</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Moderate Page Size</strong><br><code>moderate_page_size</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Moderate Response Time</strong><br><code>moderate_response_time</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rendered--9-checks">Rendered  <sub>9 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong>Image Rendered Larger Than Its Source</strong><br><code>rendered_image_oversized</code></td>
+<td>🔴 error</td>
+<td>Serve the image at the size it is displayed, or cap its CSS width to the source width.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Page Chrome Not Visible</strong><br><code>rendered_chrome_hidden</code></td>
+<td>🟠 warning</td>
+<td>Remove the CSS rule hiding the nav, or the layout the rule belongs to.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>JavaScript Console Error</strong><br><code>rendered_console_error</code></td>
+<td>🟠 warning</td>
+<td>Fix the script that throws, or remove it from the page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Heading Styled But Not Marked Up</strong><br><code>rendered_fake_heading</code></td>
+<td>🟠 warning</td>
+<td>Replace the element with the heading level it looks like, or drop the heading styling.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Text Hidden By CSS</strong><br><code>rendered_hidden_text</code></td>
+<td>🟠 warning</td>
+<td>Delete the text, or remove the rule that hides it, so the markup matches the page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Structured Data Removed By JavaScript</strong><br><code>rendered_jsonld_removed</code></td>
+<td>🟠 warning</td>
+<td>Stop the script that rewrites the page from discarding the JSON-LD block.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Horizontal Overflow</strong><br><code>rendered_layout_overflow</code></td>
+<td>🟠 warning</td>
+<td>Constrain the overflowing element with max-width:100% or overflow-x handling at this breakpoint.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Structured Data Added By JavaScript</strong><br><code>rendered_jsonld_injected</code></td>
+<td>🔵 info</td>
+<td>Emit this JSON-LD in the server response so every parser sees it.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Visible Text Missing From The HTML</strong><br><code>rendered_text_js_injected</code></td>
+<td>🔵 info</td>
+<td>Render this copy server-side so it is in the HTML response.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rules--1-checks">Rules  <sub>1 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Forbidden phrase (rule &quot;coverage-banned-claim&quot;)</strong><br><code>rule:coverage-banned-claim</code></td>
+<td>🟠 warning</td>
+<td>Remove or reword the text matching &quot;guaranteed results&quot; on this page.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="seo--7-checks">SEO  <sub>7 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong>Missing H1 Tag</strong><br><code>missing_h1</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Missing Meta Description</strong><br><code>missing_meta_description</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Missing Title Tag</strong><br><code>missing_title</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Meta Description Too Long</strong><br><code>meta_description_too_long</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Meta Description Too Short</strong><br><code>meta_description_too_short</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Title Too Long</strong><br><code>title_too_long</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Title Too Short</strong><br><code>title_too_short</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="security--10-checks">Security  <sub>10 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><strong>Cookie Readable by Script</strong><br><code>cookie_without_httponly</code></td>
+<td>🟠 warning</td>
+<td>Add HttpOnly to every cookie that no script needs to read.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>CSP Allows 'unsafe-eval'</strong><br><code>csp_unsafe_eval</code></td>
+<td>🟠 warning</td>
+<td>Remove 'unsafe-eval' and replace the code that needs it.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>CSP Allows 'unsafe-inline'</strong><br><code>csp_unsafe_inline</code></td>
+<td>🟠 warning</td>
+<td>Replace 'unsafe-inline' with a per-response nonce or a hash for each inline script.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Referrer-Policy Leaks Full URLs</strong><br><code>insecure_referrer_policy</code></td>
+<td>🟠 warning</td>
+<td>Replace unsafe-url with strict-origin-when-cross-origin.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>No X-Content-Type-Options</strong><br><code>missing_x_content_type_options</code></td>
+<td>🟠 warning</td>
+<td>Send X-Content-Type-Options: nosniff on every response.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Page Can Be Framed</strong><br><code>missing_x_frame_options</code></td>
+<td>🟠 warning</td>
+<td>Send X-Frame-Options: SAMEORIGIN, or a CSP frame-ancestors 'self' directive.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>No Content-Security-Policy</strong><br><code>missing_csp</code></td>
+<td>🔵 info</td>
+<td>Send a Content-Security-Policy header, starting with a report-only policy if the site has never had one.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>No Permissions-Policy</strong><br><code>missing_permissions_policy</code></td>
+<td>🔵 info</td>
+<td>Send a Permissions-Policy header denying the browser features the page does not use.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>No Referrer-Policy</strong><br><code>missing_referrer_policy</code></td>
+<td>🔵 info</td>
+<td>Send Referrer-Policy: strict-origin-when-cross-origin.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Server Version Disclosed</strong><br><code>server_version_disclosed</code></td>
+<td>🔵 info</td>
+<td>Drop the version from the Server header and remove X-Powered-By entirely.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sitemap--20-checks">Sitemap  <sub>20 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap File Error</strong><br><code>sitemap_file_error</code></td>
+<td>🔴 error</td>
+<td>Serve every sitemap file listed in robots.txt and in the index with HTTP 200 and valid XML.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Blocked by robots.txt</strong><br><code>sitemap_url_blocked_by_robots</code></td>
+<td>🔴 error</td>
+<td>Allow these URLs in robots.txt, or remove them from the sitemap.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Canonicalises Elsewhere</strong><br><code>sitemap_url_canonicalised_away</code></td>
+<td>🔴 error</td>
+<td>List the canonical URL in the sitemap instead of this one.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Is noindex</strong><br><code>sitemap_url_noindex</code></td>
+<td>🔴 error</td>
+<td>Either remove the noindex tag or drop the URL from the sitemap.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Returns 4xx</strong><br><code>sitemap_url_not_found</code></td>
+<td>🔴 error</td>
+<td>Remove dead URLs from the sitemap, or restore the pages they point at.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Returns 5xx</strong><br><code>sitemap_url_server_error</code></td>
+<td>🔴 error</td>
+<td>Fix the server errors, or remove those URLs from the sitemap.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Sitemap/Canonical Mismatch</strong><br><code>sitemap_canonical_mismatch</code></td>
+<td>🟠 warning</td>
+<td>Emit the exact canonical URL in the sitemap, character for character.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Duplicate URL in Sitemaps</strong><br><code>sitemap_duplicate_urls</code></td>
+<td>🟠 warning</td>
+<td>List each URL in exactly one sitemap file, once.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Inconsistent Trailing Slashes</strong><br><code>sitemap_inconsistent_trailing_slash</code></td>
+<td>🟠 warning</td>
+<td>Pick one trailing-slash convention and list only canonical URLs in that form.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Most Sitemap Entries Have No lastmod</strong><br><code>sitemap_lastmod_coverage_low</code></td>
+<td>🟠 warning</td>
+<td>Emit an accurate &lt;lastmod&gt; for every URL from the CMS's modified date.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>lastmod in the Future</strong><br><code>sitemap_lastmod_future</code></td>
+<td>🟠 warning</td>
+<td>Emit the real modified date; a future date makes the signal worthless.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Malformed lastmod</strong><br><code>sitemap_lastmod_malformed</code></td>
+<td>🟠 warning</td>
+<td>Write &lt;lastmod&gt; as YYYY-MM-DD or a full W3C datetime with a timezone offset.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>lastmod Not Updated</strong><br><code>sitemap_lastmod_not_bumped</code></td>
+<td>🟠 warning</td>
+<td>Make the CMS write the real modified date into the sitemap when content is edited.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>No Readable Sitemap</strong><br><code>sitemap_missing</code></td>
+<td>🟠 warning</td>
+<td>Publish an XML sitemap and declare it with a Sitemap: line in robots.txt.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Mixed Hostnames in Sitemap</strong><br><code>sitemap_mixed_hosts</code></td>
+<td>🟠 warning</td>
+<td>List every URL on the canonical hostname only.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap Index Nested Too Deep</strong><br><code>sitemap_nested_index</code></td>
+<td>🟠 warning</td>
+<td>Flatten the sitemap tree: an index must point directly at URL sitemaps.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Redirects</strong><br><code>sitemap_url_redirects</code></td>
+<td>🟠 warning</td>
+<td>List the final destination URL in the sitemap instead of the redirecting one.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Missing lastmod</strong><br><code>sitemap_lastmod_missing</code></td>
+<td>🔵 info</td>
+<td>Emit &lt;lastmod&gt; from the CMS modified date for every entry.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Crawled Page Missing From Sitemap</strong><br><code>sitemap_missing_crawled_url</code></td>
+<td>🔵 info</td>
+<td>Add these URLs to the sitemap, or mark them noindex if they should not be indexed.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Sitemap URL Not Crawled</strong><br><code>sitemap_url_not_crawled</code></td>
+<td>🔵 info</td>
+<td>Check that these URLs are linked from the site, or raise the crawl limit.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="social--2-checks">Social  <sub>2 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>Missing OpenGraph Tags</strong><br><code>missing_opengraph</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Missing Twitter Card Tags</strong><br><code>missing_twitter_card</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="structured-data--1-checks">Structured Data  <sub>1 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>No Structured Data</strong><br><code>no_structured_data</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="technical--50-checks">Technical  <sub>50 checks</sub></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Check</th>
+<th>Severity</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td><strong>404 Client Error</strong><br><code>404_client_error</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Canonical Blocked by robots.txt</strong><br><code>canonical_blocked_by_robots</code></td>
+<td>🔴 error</td>
+<td>Allow the canonical URL in robots.txt; a blocked canonical cannot be read.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Canonical Points to Another Domain</strong><br><code>canonical_cross_domain</code></td>
+<td>🔴 error</td>
+<td>Point the canonical at this site, or remove the page if the other domain owns it.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Canonical Points to a Noindex Page</strong><br><code>canonical_to_noindex</code></td>
+<td>🔴 error</td>
+<td>Canonicalise to an indexable page, or drop the noindex from the target.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Connection Error</strong><br><code>connection_error</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Connection Refused</strong><br><code>connection_refused</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>DNS Not Found</strong><br><code>dns_not_found</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>FAQ Markup Not in the Visible Text</strong><br><code>faq_answer_not_visible</code></td>
+<td>🔴 error</td>
+<td>Make the marked-up question the exact string the page shows, numbering prefixes included.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Invalid hreflang Code</strong><br><code>hreflang_invalid_code</code></td>
+<td>🔴 error</td>
+<td>Use a language code, optionally with a region: en, en-GB, es-US.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>hreflang Return Link Missing</strong><br><code>hreflang_no_return_link</code></td>
+<td>🔴 error</td>
+<td>Every hreflang must be mutual: if A names B, B must name A.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>JSON-LD Fails to Parse</strong><br><code>jsonld_parse_error</code></td>
+<td>🔴 error</td>
+<td>Fix the JSON syntax; a block that does not parse is ignored entirely by search engines.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Page Links to Broken URLs</strong><br><code>links_to_broken_urls</code></td>
+<td>🔴 error</td>
+<td>Update or remove the link; a visitor following it hits an error.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Noindex Page in the Sitemap</strong><br><code>noindex_in_sitemap</code></td>
+<td>🔴 error</td>
+<td>Remove the URL from the sitemap, or remove its noindex.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Redirect Loop</strong><br><code>redirect_loop</code></td>
+<td>🔴 error</td>
+<td>Break the loop: a redirect must end at a URL that serves content.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Request Timeout</strong><br><code>request_timeout</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>SSL/TLS Error</strong><br><code>ssl_tls_error</code></td>
+<td>🔴 error</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Canonical Chain</strong><br><code>canonical_chain</code></td>
+<td>🟠 warning</td>
+<td>Point every page at the final canonical URL directly.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Canonical URL Different</strong><br><code>canonical_different</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Relative Canonical URL</strong><br><code>canonical_relative</code></td>
+<td>🟠 warning</td>
+<td>Write the canonical as an absolute URL; a relative one is resolved inconsistently.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Canonical Points to a Redirect</strong><br><code>canonical_to_redirect</code></td>
+<td>🟠 warning</td>
+<td>Canonicalise to the destination of the redirect.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Duplicate Meta Description Across Pages</strong><br><code>duplicate_meta_description</code></td>
+<td>🟠 warning</td>
+<td>Write a description per page; a shared one is usually rewritten by Google.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Duplicate Title Across Pages</strong><br><code>duplicate_title</code></td>
+<td>🟠 warning</td>
+<td>Give every page a title that describes that page alone.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Empty Alt on an Image That Means Something</strong><br><code>empty_alt_on_content_image</code></td>
+<td>🟠 warning</td>
+<td>Describe the image in its alt, or give the link a text label; keep alt=&quot;&quot; for decoration only.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Empty Heading</strong><br><code>empty_heading</code></td>
+<td>🟠 warning</td>
+<td>Remove the empty heading, or give it text.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>hreflang Set Has No Self-Reference</strong><br><code>hreflang_missing_self</code></td>
+<td>🟠 warning</td>
+<td>Add an hreflang entry pointing at the page itself.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Lazy-Loaded Image Above the Fold</strong><br><code>image_lazy_above_fold</code></td>
+<td>🟠 warning</td>
+<td>Load the first images eagerly; lazy-loading them delays the largest paint.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Image Without Width and Height</strong><br><code>image_missing_dimensions</code></td>
+<td>🟠 warning</td>
+<td>Set width and height so the browser can reserve the space and the layout stops jumping.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Oversized Image</strong><br><code>image_too_heavy</code></td>
+<td>🟠 warning</td>
+<td>Compress the image and serve a modern format at the size it is displayed.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Nofollow on Internal Links</strong><br><code>internal_link_nofollow</code></td>
+<td>🟠 warning</td>
+<td>Remove rel=&quot;nofollow&quot; from internal links; it only wastes the link.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Internal Links Point at Redirects</strong><br><code>internal_link_to_redirect</code></td>
+<td>🟠 warning</td>
+<td>Link straight to the destination; every redirect costs a round trip.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>JSON-LD @id Resolves to Nothing</strong><br><code>jsonld_dangling_id</code></td>
+<td>🟠 warning</td>
+<td>Define the referenced node on the page, or inline the object instead of referencing it.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Missing Canonical URL</strong><br><code>missing_canonical</code></td>
+<td>🟠 warning</td>
+<td>—</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Internal Links Mix www and non-www</strong><br><code>mixed_host_links</code></td>
+<td>🟠 warning</td>
+<td>Pick one hostname and link to it consistently.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Internal Links Mix http and https</strong><br><code>mixed_protocol_links</code></td>
+<td>🟠 warning</td>
+<td>Link internally over https only.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>More Than One H1</strong><br><code>multiple_h1</code></td>
+<td>🟠 warning</td>
+<td>Keep one H1 per page and demote the others to H2.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Noindex Page Linked Internally</strong><br><code>noindex_page_linked</code></td>
+<td>🟠 warning</td>
+<td>Drop the links, or make the page indexable if it should rank.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Heavy Page</strong><br><code>page_too_heavy</code></td>
+<td>🟠 warning</td>
+<td>Trim the payload: images, embedded fonts and scripts dominate page weight.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Broken Pagination Chain</strong><br><code>pagination_broken_chain</code></td>
+<td>🟠 warning</td>
+<td>Point rel=&quot;next&quot; at the next page that exists, or drop it from the last page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Paginated Page Canonicalises to Page 1</strong><br><code>pagination_canonical_to_page_one</code></td>
+<td>🟠 warning</td>
+<td>Make each paginated page canonical to itself; Google reads a canonical to page 1 as a mistake.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Redirect Chain</strong><br><code>redirect_chain</code></td>
+<td>🟠 warning</td>
+<td>Point the first URL straight at the final destination.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Slow Time to First Byte</strong><br><code>slow_ttfb</code></td>
+<td>🟠 warning</td>
+<td>Cache the response or speed up the server; nothing renders before the first byte.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Templated Title Says Nothing</strong><br><code>templated_title</code></td>
+<td>🟠 warning</td>
+<td>Put what the page is about before the template, and make it different per page.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Meta Description Too Wide</strong><br><code>description_too_wide</code></td>
+<td>🔵 info</td>
+<td>Put the point in the first 900px; the rest is cut off.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Duplicate H1 Across Pages</strong><br><code>duplicate_h1</code></td>
+<td>🔵 info</td>
+<td>Make each H1 name what is on that page.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Stray Whitespace in Heading Text</strong><br><code>heading_stray_whitespace</code></td>
+<td>🔵 info</td>
+<td>Trim the heading text; the spacing shows up in search results and anchors.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Pagination Does Not Link Back</strong><br><code>pagination_no_return_link</code></td>
+<td>🔵 info</td>
+<td>Add rel=&quot;prev&quot; pointing back at the page that names this one as rel=&quot;next&quot;.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Paginated Page Has No Inbound Links</strong><br><code>pagination_orphaned_page</code></td>
+<td>🔵 info</td>
+<td>Link the page from a listing, a sitemap or navigation so it does not depend on the pagination chain.</td>
+</tr>
+<tr>
+<td>✅</td>
+<td><strong>Heading Level Skipped</strong><br><code>skipped_heading_level</code></td>
+<td>🔵 info</td>
+<td>Step heading levels one at a time so the outline reads correctly.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Title Too Wide for Search Results</strong><br><code>title_too_wide</code></td>
+<td>🔵 info</td>
+<td>Shorten the title, or move the wide part to the end where it can be cut.</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Content Page Cannot Be Cached</strong><br><code>uncacheable_content</code></td>
+<td>🔵 info</td>
+<td>Allow caching for pages that do not change per visitor.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="observed-firing-not-described-above--59-checks">Observed firing, not described above  <sub>59 checks</sub></h2>
+<p>These fired in the coverage sweep but have never been reported through
+the install this reference was generated from, so there is no wording
+to quote for them yet. They are listed rather than dropped, because a
+reference that silently omits a third of the checks is how a tool ends
+up with checks nobody knows exist.</p>
+<ul>
+<li><code>agent_unavailable</code> · <code>agent_weak_experience</code> · <code>authority_page_buried</code></li>
+<li><code>bot_spoofing</code> · <code>broken_image</code> · <code>casing_mistake</code></li>
+<li><code>cls_needs_improvement</code> · <code>cls_poor</code> · <code>cms_author_unexpected</code></li>
+<li><code>cookie_without_samesite</code> · <code>cookie_without_secure_flag</code> · <code>crawl_budget_wasted</code></li>
+<li><code>field_cls_poor</code> · <code>field_first_contentful_paint_poor</code> · <code>field_inp_poor</code></li>
+<li><code>field_lcp_poor</code> · <code>first_contentful_paint_poor</code> · <code>ga_high_bounce</code></li>
+<li><code>ga_no_sessions</code> · <code>ga_page_not_in_crawl</code> · <code>grammar_mistake</code></li>
+<li><code>gsc_canonical_overridden</code> · <code>gsc_low_ctr</code> · <code>gsc_no_impressions</code></li>
+<li><code>gsc_not_indexed</code> · <code>gsc_page_not_in_crawl</code> · <code>gsc_query_cannibalisation</code></li>
+<li><code>high_spam_score</code> · <code>hsts_max_age_too_short</code> · <code>inp_needs_improvement</code></li>
+<li><code>inp_poor</code> · <code>insecure_form_action</code> · <code>lcp_needs_improvement</code></li>
+<li><code>lcp_poor</code> · <code>link_metrics_unavailable</code> · <code>log_format_unrecognised</code></li>
+<li><code>missing_hsts</code> · <code>mixed_content_active</code> · <code>mixed_content_passive</code></li>
+<li><code>mobile_desktop_divergence</code> · <code>never_requested_by_search</code> · <code>no_external_interest</code></li>
+<li><code>pdf_damaged</code> · <code>pdf_encrypted</code> · <code>pdf_missing_title</code></li>
+<li><code>pdf_no_text_layer</code> · <code>pdf_too_heavy</code> · <code>performance_score_low</code></li>
+<li><code>punctuation_mistake</code> · <code>requested_but_not_crawled</code> · <code>sitemap_empty</code></li>
+<li><code>sitemap_file_limit</code> · <code>sitemap_mixed_protocols</code> · <code>sitemap_too_large</code></li>
+<li><code>sitemap_too_many_urls</code> · <code>speed_index_poor</code> · <code>spelling_mistake</code></li>
+<li><code>style_suggestion</code> · <code>time_to_interactive_poor</code></li>
+</ul>
+<hr />
+<p><em>163 checks described, 59 more observed firing, 222 in total. Generated by
+<code>tools/generate_checks_doc.py</code>. Per-install counts and example text are
+deliberately omitted: both are facts about one machine's crawls rather
+than about the check.</em></p>
+<hr />
+<p>Last updated: 2026-10-20. Source: <a href="https://github.com/spcaeo/toadstone/blob/main/docs/checks.md">docs/checks.md on GitHub</a>.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>

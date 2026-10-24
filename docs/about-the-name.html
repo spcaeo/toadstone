@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The name | Toadstone docs</title>
+<meta name="description" content="Why the tool is called Toadstone, what a toadstone was, and where the project comes from: a fork of LibreCrawl.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/about-the-name.html">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/about-the-name.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="The name">
+<meta property="og:description" content="Why the tool is called Toadstone, what a toadstone was, and where the project comes from: a fork of LibreCrawl.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/about-the-name.html">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/about-the-name.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="the-name">The name</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>A <strong>toadstone</strong> is a gem that does not exist.</p>
+<p>For about five hundred years, educated people across Europe believed that a
+jewel grew inside the head of an old toad. Pliny mentions it; so does
+Shakespeare, in the line about adversity wearing a precious jewel in its
+head. You were supposed to get one by laying a toad on a red cloth until it
+gave the stone up. They were set into rings and worn, and they had one job.</p>
+<p><strong>A toadstone was said to detect poison.</strong> Held near something harmful, it
+would grow warm, sweat, or change colour. You wore it so that you would know.</p>
+<p>The stones were real objects. They were sold, inherited, listed in wills,
+and they turn up in museum collections today. They are the fossilised tooth
+plates of <em>Lepidotes</em>, a Jurassic fish — button-shaped, domed, faintly
+polished, and nothing whatever to do with toads. They never detected
+anything. People wore them for centuries, and felt safer, and were not.</p>
+<p>That is why the name is on this tool.</p>
+<h2 id="the-thing-this-project-spent-its-first-days-learning">The thing this project spent its first days learning</h2>
+<p>A crawler is a detector. You point it at a site and it tells you what is
+wrong. The entire value of it rests on one assumption: that when it says
+nothing is wrong, nothing is wrong.</p>
+<p>On the day this fork got its own name, somebody measured that assumption for
+the first time. The project had 225 checks. <strong>84 of them had ever been
+observed to fire.</strong> The rest passed their unit tests and sat inert on every
+real crawl — eight AMP checks that could not fire on any site because the
+markup they read was never kept; every PDF check, dead the moment JavaScript
+rendering was switched on; a raw-versus-rendered comparison that had been
+comparing a document against itself; a translation check that missed its
+commonest case. A failed PageSpeed run reported as a clean bill of
+performance. Three &quot;checks&quot; that were not checks at all, only sample data
+left in a test file.</p>
+<p>None of that looked broken. Every report came back clean and confident, and
+clean was the wrong answer. The tool was a fossil fish tooth in a ring: worn
+in good faith, detecting nothing, and all the more dangerous for how
+reassuring it was.</p>
+<p>Eleven of those faults were found by one method — build a page that <em>should</em>
+make a check fire, then watch it stay silent. A twelfth was in the measuring
+instrument itself, which gave each crawl two minutes and then reported
+whatever had happened by then as a pass.</p>
+<h2 id="so-toadstone">So: Toadstone</h2>
+<p>The name is a reminder, pointed at ourselves.</p>
+<p>Most tools in this field are named for what they do to a website — they
+crawl it, spider it, audit it, scan it. The verb is always something done
+<em>to</em> a site by something slightly predatory, and the reports read that way:
+a wall of findings, scored and ranked, handed over as a verdict.</p>
+<p>But a detector that has never been shown to detect is just jewellery. The
+question that matters is not how many checks a tool advertises. It is how
+many of them have been watched to fire, on a real crawl, against a page
+built to be wrong — and what the tool does when it cannot answer, which must
+never be to go quiet and let silence read as health.</p>
+<p>We count that number in public, in <code>BUILD-LOG.md</code>, including the parts that
+are stubbed, the parts that rest on someone else's API, and the one check
+proven with a model's answer supplied rather than asked for. When a check
+cannot honestly be reached, it says so rather than being quietly dropped
+from the total.</p>
+<p>A toadstone that works would be worth wearing. That is the whole ambition.</p>
+<hr />
+<p><strong>Pronunciation.</strong> TOHD-stohn. As it looks.</p>
+<p><strong>Also known as:</strong> <em>bufonite</em>, from <em>bufo</em>, the toad genus — the name used
+when the fossils were finally identified for what they are.</p>
+<hr />
+<h2 id="where-toadstone-comes-from">Where Toadstone comes from</h2>
+<p>Toadstone is a fork of <a href="https://librecrawl.com">LibreCrawl</a>, an open-source
+crawler written by Phiality and released under the MIT licence. The crawling
+engine, the multi-tenant model and the plugin system are theirs. We renamed
+the fork because it has grown its own opinions, not because we think we
+started it.</p>
+<p>The MIT licence asks only that the original copyright notice travels with the
+software. It does, and we go further than the licence requires, because a
+single developer giving away work that replaces a £199-a-year product is the
+reason any of this exists.</p>
+<hr />
+<p>Last updated: 2026-10-20. Source: <a href="https://github.com/spcaeo/toadstone/blob/main/docs/about-the-name.md">docs/about-the-name.md on GitHub</a>.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>

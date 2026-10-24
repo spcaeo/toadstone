@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toadstone MCP server | Toadstone docs</title>
+<meta name="description" content="Ten tools that let a coding agent read a crawl and find what is wrong with a site, read-only by default, with setup for Claude Code and Cursor, its guardrails and its transports.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://spcaeo.github.io/toadstone/docs/mcp.html">
+<link rel="alternate" type="text/markdown" href="https://spcaeo.github.io/toadstone/docs/mcp.md">
+<link rel="stylesheet" href="https://spcaeo.github.io/toadstone/docs/docs.css">
+<link rel="icon" href="https://spcaeo.github.io/toadstone/static/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Toadstone MCP server">
+<meta property="og:description" content="Ten tools that let a coding agent read a crawl and find what is wrong with a site, read-only by default, with setup for Claude Code and Cursor, its guardrails and its transports.">
+<meta property="og:url" content="https://spcaeo.github.io/toadstone/docs/mcp.html">
+<meta property="article:modified_time" content="2026-10-20">
+</head>
+<body>
+<div class="wrap">
+<header><p class="top"><a href="https://spcaeo.github.io/toadstone/docs/">Toadstone docs</a> &middot; <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a> &middot; <a href="https://spcaeo.github.io/toadstone/docs/mcp.md">Markdown version</a> &middot; <a href="https://github.com/spcaeo/toadstone">GitHub</a></p></header>
+<main>
+<h1 id="toadstone-mcp-server">Toadstone MCP server</h1>
+<blockquote>
+<p>For the complete documentation index, see <a href="https://spcaeo.github.io/toadstone/llms.txt">llms.txt</a>. Every page here is also served as Markdown at the same address with <code>.md</code> instead of <code>.html</code>.</p>
+</blockquote>
+<p>Ten tools that let a coding agent read a crawl, find what is wrong with a
+site, and — if you let it — start a crawl and mute an issue. It speaks the
+Model Context Protocol, so Claude Code, Claude Desktop and Cursor can use it
+directly.</p>
+<p>It is a wrapper over Toadstone's own HTTP API, not a second implementation of
+it. Every answer comes from a route you could call with <code>curl</code>
+(<code>docs/agent-handoff.md</code> shows how), trimmed to what fits in a model's context
+and bounded so a 20,000-issue crawl answers in a readable page.</p>
+<p>It is <strong>read-only by default</strong>, it will <strong>only crawl hosts you have already
+crawled</strong>, and it caps a crawl at <strong>2,000 URLs</strong>. All three are configurable
+and all three are explained below.</p>
+<hr />
+<h2 id="quick-start">Quick start</h2>
+<p>Toadstone must be running. In local mode there is no key to set up:</p>
+<pre><code class="language-bash">./start-toadstone.sh          # or: python main.py --local
+python -m src.mcp --print-config
+</code></pre>
+<p><code>--print-config</code> prints the guardrails and exits, which is the fastest way to
+check that a config block does what you meant.</p>
+<h3 id="claude-code">Claude Code</h3>
+<pre><code class="language-bash">claude mcp add toadstone -- python -m src.mcp
+</code></pre>
+<p>or add it to <code>.mcp.json</code> in your project (so your team gets it too):</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;toadstone&quot;: {
+      &quot;command&quot;: &quot;python&quot;,
+      &quot;args&quot;: [&quot;-m&quot;, &quot;src.mcp&quot;],
+      &quot;cwd&quot;: &quot;/absolute/path/to/Toadstone&quot;,
+      &quot;env&quot;: {
+        &quot;TOADSTONE_MCP_URL&quot;: &quot;http://localhost:5000&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="cursor">Cursor</h3>
+<p><code>~/.cursor/mcp.json</code> for every project, or <code>.cursor/mcp.json</code> for one:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;toadstone&quot;: {
+      &quot;command&quot;: &quot;python&quot;,
+      &quot;args&quot;: [&quot;-m&quot;, &quot;src.mcp&quot;],
+      &quot;cwd&quot;: &quot;/absolute/path/to/Toadstone&quot;,
+      &quot;env&quot;: {
+        &quot;TOADSTONE_MCP_URL&quot;: &quot;http://localhost:5000&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="letting-the-agent-start-crawls">Letting the agent start crawls</h3>
+<p>Writes are off until you say otherwise, and the host allow-list is separate
+from the write switch, so turning writes on does not open the crawler on the
+internet:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;toadstone&quot;: {
+      &quot;command&quot;: &quot;python&quot;,
+      &quot;args&quot;: [&quot;-m&quot;, &quot;src.mcp&quot;, &quot;--allow-writes&quot;, &quot;--allow-host&quot;, &quot;staging.example.com&quot;],
+      &quot;cwd&quot;: &quot;/absolute/path/to/Toadstone&quot;,
+      &quot;env&quot;: { &quot;TOADSTONE_MCP_URL&quot;: &quot;http://localhost:5000&quot; }
+    }
+  }
+}
+</code></pre>
+<h3 id="a-toadstone-that-is-not-in-local-mode">A Toadstone that is not in local mode</h3>
+<p>Give the server an account. It logs in once and keeps the session:</p>
+<pre><code class="language-json">&quot;env&quot;: {
+  &quot;TOADSTONE_MCP_URL&quot;: &quot;https://toadstone.internal&quot;,
+  &quot;TOADSTONE_MCP_USERNAME&quot;: &quot;agent&quot;,
+  &quot;TOADSTONE_MCP_PASSWORD&quot;: &quot;...&quot;
+}
+</code></pre>
+<p><code>TOADSTONE_MCP_COOKIE</code> takes a raw <code>name=value; name=value</code> cookie string
+instead, if you would rather not put a password in a config file.</p>
+<hr />
+<h2 id="the-tools">The tools</h2>
+<p>Every tool returns one JSON object in a text block. Lists report the total
+they were drawn from, so a trimmed answer never looks like a complete one.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Arguments</th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_crawls</code></td>
+<td><code>limit</code>, <code>status</code></td>
+<td>Recent crawls: id, URL, status, page counts. Start here.</td>
+</tr>
+<tr>
+<td><code>crawl_status</code></td>
+<td><code>crawl_id</code></td>
+<td>Status, pages done, pages found, ETA. Poll after <code>start_crawl</code>.</td>
+</tr>
+<tr>
+<td><code>list_issues</code></td>
+<td><code>crawl_id</code>, <code>severity</code>, <code>check</code>, <code>category</code>, <code>url_prefix</code>, <code>status</code>, <code>since_crawl</code>, <code>include_accepted</code>, <code>limit</code>, <code>offset</code></td>
+<td>The issues, with a tally by severity and by check. The workhorse.</td>
+</tr>
+<tr>
+<td><code>issue_detail</code></td>
+<td><code>crawl_id</code>, <code>issue_id</code></td>
+<td>One issue by its stable id, plus a summary of the page it sits on.</td>
+</tr>
+<tr>
+<td><code>page_detail</code></td>
+<td><code>crawl_id</code>, <code>url</code>, <code>baseline</code>, <code>include_links</code>, <code>link_limit</code></td>
+<td>One URL: the stored row, its headings tree, its issues, links both ways, and how it changed since the previous crawl.</td>
+</tr>
+<tr>
+<td><code>regression_diff</code></td>
+<td><code>baseline_crawl_id</code>, <code>candidate_crawl_id</code>, <code>limit</code></td>
+<td>New, fixed and still-open issues between two crawls, matched by stable id.</td>
+</tr>
+<tr>
+<td><code>export_dataset</code></td>
+<td><code>crawl_id</code>, <code>dataset</code>, <code>format</code>, <code>limit</code>, <code>severity</code>, <code>check</code>, <code>url_prefix</code>, <code>status_code</code></td>
+<td>A whole dataset as csv, json or ndjson.</td>
+</tr>
+<tr>
+<td><code>check_reference</code></td>
+<td><code>check</code></td>
+<td>What a check means, how severe it is, how to fix it.</td>
+</tr>
+<tr>
+<td><code>start_crawl</code> <strong>(write)</strong></td>
+<td><code>url</code>, <code>render</code>, <code>max_urls</code>, <code>max_depth</code></td>
+<td>Starts a crawl, returns its id.</td>
+</tr>
+<tr>
+<td><code>accept_issue</code> <strong>(write)</strong></td>
+<td><code>issue_id</code>, <code>reason</code>, <code>base_domain</code></td>
+<td>Mutes one issue with a reason.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="datasets">Datasets</h3>
+<p><code>export_dataset</code> serves the same twelve datasets as
+<code>GET /api/crawls/&lt;id&gt;/export/&lt;dataset&gt;</code>:</p>
+<p><code>issues</code>, <code>pages</code>, <code>links</code>, <code>graph-nodes</code>, <code>graph-edges</code>, <code>sitemap-files</code>,
+<code>sitemap-coverage</code>, <code>duplicates</code>, <code>redirects</code>, <code>broken-links</code>, <code>headings</code>,
+<code>images</code>.</p>
+<p><code>csv</code>, <code>json</code> and <code>ndjson</code> come back as text. <code>xlsx</code> and <code>zip</code> are binary
+downloads and cannot travel through MCP; the tool refuses them and hands you
+the HTTP URL that will serve the file.</p>
+<h3 id="issue-ids">Issue ids</h3>
+<p>An issue id is <code>sha1(url + check + offending value)</code>, so the same defect keeps
+the same id from crawl to crawl: that is what makes <code>regression_diff</code> and
+<code>accept_issue</code> meaningful. Two consequences worth knowing:</p>
+<ul>
+<li>An id is <strong>stable across crawls but not unique to one</strong>, so <code>issue_detail</code>
+takes a <code>crawl_id</code> as well. There is no <code>GET /api/issues/&lt;id&gt;</code> to wrap.</li>
+<li>Because the URL is part of the hash, two crawls of one site served from
+<strong>different hosts</strong> (staging against production) read as entirely new and
+entirely fixed. <code>regression_diff</code> says so in its own output.</li>
+</ul>
+<h3 id="a-typical-session">A typical session</h3>
+<pre><code>list_crawls                              -&gt; crawl 86, completed
+list_issues  crawl_id=86 severity=error  -&gt; 12 errors, tallied by check
+check_reference check=missing_canonical  -&gt; what it means, how to fix it
+page_detail  crawl_id=86 url=...         -&gt; the page, its links, its diff
+&lt;fix the site&gt;
+start_crawl  url=https://site.test       -&gt; crawl 87
+crawl_status crawl_id=87                 -&gt; poll until completed
+regression_diff baseline=86 candidate=87 -&gt; what you fixed, and what you broke
+</code></pre>
+<hr />
+<h2 id="guardrails">Guardrails</h2>
+<p>An MCP server is a crawler with its trigger wired to a language model. The
+failure that matters is not a wrong answer; it is a thousand requests to
+somebody else's site because a model read a URL on a page and decided to look
+into it. Three rules stop that, and none of them can be turned off from a tool
+call — only at startup, by you.</p>
+<h3 id="read-only-by-default">Read-only by default</h3>
+<p><code>start_crawl</code> and <code>accept_issue</code> refuse until the server is started with
+<code>--allow-writes</code> (or <code>TOADSTONE_MCP_ALLOW_WRITES=true</code>). On a read-only
+server both tools are still listed, with a note in the description saying they
+will be refused, so the agent knows the capability exists and why it cannot
+use it.</p>
+<h3 id="host-allow-list">Host allow-list</h3>
+<p>With no allow-list, the server permits <strong>only hosts this Toadstone install
+has already crawled</strong> — the set a human has already pointed the crawler at.
+An empty list does not mean &quot;anything&quot;.</p>
+<ul>
+<li><code>--allow-host example.com</code> permits <code>example.com</code> and its subdomains.
+Repeatable.</li>
+<li><code>--allow-host '*'</code> turns the check off. Do this only when the crawler is
+pointed at infrastructure you own.</li>
+<li>The list of known hosts is read once at startup, so a host that becomes
+known because of a crawl started in this session stays refused until the
+server restarts.</li>
+</ul>
+<h3 id="url-cap">URL cap</h3>
+<p>A crawl may not be asked for more URLs than the cap, which defaults to 2,000.
+A request above it is <strong>refused, not quietly clamped</strong>: silently trimming would
+let an agent crawl 2,000 pages of a 50,000-page site and report on the sample
+as if it were the site. A crawl that asks for nothing gets the cap.</p>
+<p><code>max_depth</code> is not capped by size, only sanity-checked (0–100).</p>
+<h3 id="what-else-is-refused">What else is refused</h3>
+<ul>
+<li>Any scheme but <code>http</code> and <code>https</code>.</li>
+<li>Credentials in the URL (<code>https://user:pass@host/</code>) — they would end up in
+logs. Configure crawl authentication in Toadstone instead.</li>
+<li>Another account's crawls. Every tool reaches the API through the same
+session and the same <code>login_required</code> and ownership checks as a browser
+would, so the server can see exactly what its caller could already see.</li>
+</ul>
+<h3 id="settings">Settings</h3>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>Flag</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TOADSTONE_MCP_URL</code></td>
+<td><code>--url</code></td>
+<td><code>http://localhost:5000</code></td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_ALLOW_HOSTS</code></td>
+<td><code>--allow-host</code> (repeatable)</td>
+<td>empty — hosts already crawled</td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_MAX_URLS</code></td>
+<td><code>--max-urls</code></td>
+<td><code>2000</code></td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_ALLOW_WRITES</code></td>
+<td><code>--allow-writes</code> / <code>--read-only</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_USERNAME</code></td>
+<td><code>--username</code></td>
+<td>none (local mode auto-logs in)</td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_PASSWORD</code></td>
+<td><code>--password</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_COOKIE</code></td>
+<td>—</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_TIMEOUT</code></td>
+<td><code>--timeout</code></td>
+<td><code>120</code> seconds</td>
+</tr>
+<tr>
+<td><code>TOADSTONE_MCP_MAX_BYTES</code></td>
+<td>—</td>
+<td><code>200000</code> characters per export</td>
+</tr>
+</tbody>
+</table>
+<p>A flag beats an environment variable, so a config block can set the policy and
+you can still override one setting for a single run.</p>
+<hr />
+<h2 id="transports">Transports</h2>
+<h3 id="stdio-what-agent-runtimes-use">stdio (what agent runtimes use)</h3>
+<p><code>python -m src.mcp</code>. Newline-delimited JSON-RPC on stdin and stdout; every
+diagnostic goes to stderr, because anything else on stdout corrupts the
+protocol stream.</p>
+<p>You can drive it by hand, which is the quickest way to see whether a problem
+is the server or the client:</p>
+<pre><code class="language-bash">printf '%s\n' \
+  '{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;method&quot;:&quot;initialize&quot;,&quot;params&quot;:{&quot;protocolVersion&quot;:&quot;2025-06-18&quot;}}' \
+  '{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:2,&quot;method&quot;:&quot;tools/list&quot;}' \
+  | TOADSTONE_MCP_URL=http://localhost:5000 python -m src.mcp
+</code></pre>
+<h3 id="http-mounted-inside-toadstone">HTTP (mounted inside Toadstone)</h3>
+<pre><code>POST /api/mcp     one JSON-RPC request, one JSON response
+GET  /api/mcp     what the server is and how it is configured
+</code></pre>
+<p>This is Streamable HTTP with the streaming left out: every method this server
+implements answers in one message, so there is nothing to stream and no
+session to keep. A client that requires SSE will not work against it; stdio is
+the supported path for Claude Code and Cursor.</p>
+<p>It is behind the app's own <code>login_required</code>, and a tool call is answered as
+whoever sent the request, using their cookies.</p>
+<pre><code class="language-bash">B=http://localhost:5000; J=/tmp/toadstone-cookies.txt
+curl -s -c $J -o /dev/null $B/
+curl -s -b $J $B/api/mcp
+curl -s -b $J -X POST $B/api/mcp -H 'Content-Type: application/json' \
+  -d '{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;method&quot;:&quot;tools/call&quot;,
+       &quot;params&quot;:{&quot;name&quot;:&quot;list_crawls&quot;,&quot;arguments&quot;:{&quot;limit&quot;:5}}}'
+</code></pre>
+<h3 id="why-no-mcp-sdk">Why no <code>mcp</code> SDK</h3>
+<p>The protocol is implemented directly, in <code>src/mcp/server.py</code>. The official
+Python SDK is not in <code>requirements.txt</code> and is not installed in the image this
+app ships in, and a server that only runs where somebody happened to <code>pip install mcp</code> is not a feature of Toadstone. A tools-only server needs four
+methods — <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code>, <code>ping</code> — and no new
+dependency was worth them.</p>
+<p>Protocol version <code>2025-06-18</code>, with <code>2025-03-26</code> and <code>2024-11-05</code> accepted on
+the handshake.</p>
+<hr />
+<h2 id="tests">Tests</h2>
+<pre><code class="language-bash">python tests/mcp_tests.py
+</code></pre>
+<p>No network, no server, no crawl: the tests drive the real protocol against the
+real Flask app over a throwaway database. The one call that would reach the
+network — <code>POST /api/crawls</code> — is intercepted, including in the tests that
+check the guardrails refuse, so a regression in a guardrail fails the suite
+instead of crawling something.</p>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong>&quot;Could not reach Toadstone&quot;</strong> — the app is not running, or
+<code>TOADSTONE_MCP_URL</code> points at the wrong port. It is whatever you set
+<code>EXTERNAL_PORT</code> to in <code>.env</code> - 5000 unless you changed it, and on a Mac you
+probably had to, because AirPlay Receiver owns 5000.</p>
+<p><strong>Every tool returns &quot;Authentication required&quot;</strong> — Toadstone is not in local
+mode and the server has no credentials. Set <code>TOADSTONE_MCP_USERNAME</code> and
+<code>TOADSTONE_MCP_PASSWORD</code>.</p>
+<p><strong><code>start_crawl</code> is refused and you did pass <code>--allow-writes</code></strong> — read the
+refusal. The <code>rule</code> field says which guardrail: <code>read_only</code>, <code>host_allow_list</code>
+or <code>max_urls</code>. Writes and the host allow-list are separate switches.</p>
+<p><strong>The client shows no tools</strong> — run the server by hand with the <code>printf</code> block
+above. If that prints a tools list, the problem is the client's config: nearly
+always a <code>cwd</code> that is not the Toadstone checkout.</p>
+<hr />
+<p>Last updated: 2026-10-20. Source: <a href="https://github.com/spcaeo/toadstone/blob/main/docs/mcp.md">docs/mcp.md on GitHub</a>.</p>
+</main>
+<footer class="foot"><p>Toadstone is free and self-hosted, and source-available under the Elastic License 2.0 (not OSI open source). Source: <a href="https://github.com/spcaeo/toadstone">https://github.com/spcaeo/toadstone</a></p></footer>
+</div>
+</body>
+</html>
